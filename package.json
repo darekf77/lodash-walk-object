@@ -1,7 +1,7 @@
 {
   "name": "lodash-walk-object",
   "description": "Walk all properties deep in object with lodash help",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "tnp": {
     "type": "isomorphic-lib",
     "isCommandLineToolOnly": true,
