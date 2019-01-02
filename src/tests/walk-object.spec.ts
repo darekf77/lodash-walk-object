@@ -43,6 +43,7 @@ describe('Walk.Object', () => {
   })
 
 
+
   it('Should go through all properties depp in array', async () => {
 
     const d = {
