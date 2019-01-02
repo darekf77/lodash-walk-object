@@ -80,3 +80,10 @@ export class Helpers {
 
 
 }
+
+
+export const walk = {
+    Object: Helpers.Walk.Object,
+    ObjectBy: Helpers.Walk.ObjectBy
+}
+
