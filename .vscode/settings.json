@@ -1,0 +1,13 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "typescript.check.workspaceVersion": false,
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#2f751acb"
+      },
+      "editor.rulers": [
+        100,
+        120
+      ],
+      "html.format.wrapAttributes": "force-aligned",
+      "workbench.colorTheme": "Default Light+"
+}
