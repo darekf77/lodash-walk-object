@@ -1,26 +1,26 @@
 {
-    "name": "lodash-walk-object",
-    "version": "0.0.1",
-    "tnp": {
-        "type": "isomorphic-lib",
-        "overrided": {
-            "includeAsDev": [
-                "morphi",
-                "@angular.*",
-                "webpack",
-                "webpack-dev-server",
-                "html-webpack-plugin",
-                "ts-loader",
-                "babel.*",
-                "mocha",
-                "@types/mocha",
-                "chai",
-                "ts-sinon"
-            ],
-            "includeOnly": [
-                "lodash",
-                "@types/lodash"
-            ]
-        }
+  "name": "lodash-walk-object",
+  "version": "0.0.1",
+  "tnp": {
+    "type": "isomorphic-lib",
+    "overrided": {
+      "includeAsDev": [
+        "morphi",
+        "@angular.*",
+        "webpack",
+        "webpack-dev-server",
+        "html-webpack-plugin",
+        "ts-loader",
+        "babel.*",
+        "mocha",
+        "@types/mocha",
+        "chai",
+        "ts-sinon"
+      ],
+      "includeOnly": [
+        "lodash",
+        "@types/lodash"
+      ]
     }
+  }
 }
