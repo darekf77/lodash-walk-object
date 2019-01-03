@@ -4,7 +4,8 @@ import { expect } from 'chai';
 import { Helpers } from '../index';
 
 // const instance = BrowserDB.instance;
-
+import { Log, Level } from 'ng2-logger';
+const log = Log.create('value change tests')
 describe('Walk.Object value change', () => {
 
 
@@ -161,6 +162,35 @@ describe('Walk.Object value change', () => {
     // console.log(d)
 
     expect(context.d.a.c).to.eq(result)
+
+  })
+
+
+  it('Should handle weird pathes', async () => {
+
+    const d = {}
+    const result = 'amzing2'
+    const weirdPath = 'dependencies.@angular-devkit/build-optimizer'
+
+    _.set(d, weirdPath, 'hellow')
+
+    const context = {
+      d
+    }
+
+
+
+    Helpers.Walk.ObjectBy('d', context, (v, lodashPath, changeValue) => {
+      // console.log('lodashPath',lodashPath)
+      if (lodashPath === weirdPath) {
+        changeValue(result)
+      }
+      // console.log(`Path: "${lodashPath}" `, v)
+    })
+    log.i('d', d)
+
+    expect(_.get(d, weirdPath)).to.eq(result)
+    expect(Object.keys(d).length).to.be.eq(1)
 
   })
 
