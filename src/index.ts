@@ -18,18 +18,21 @@ export class Helpers {
   }
 
   private static _changeValue(json: Object, lodahPath: string, simpleChange = false) {
-    if (!simpleChange) {
-      var { contextPath, property } = this._prepareParams(lodahPath);
-      var context = _.get(json, contextPath);
-    }
+
+    var { contextPath, property } = this._prepareParams(lodahPath);
+    var context = _.get(json, contextPath);
+
     return (newValue: any) => {
-      if(contextPath === '') {
+      if (contextPath === '') {
         simpleChange = true;
       }
-      // console.log(`VALUE CHANGE!  "${contextPath}" + "${property}" `, newValue)
+
       if (simpleChange) {
-        json[lodahPath] = newValue;
+        // console.log(`SIMPLE VALUE CHANGE!  "${contextPath}" + "${property}" `, newValue)
+        json[property] = newValue;
       } else {
+        // console.log(`CONTEXT VALUE CHANGE!  "${contextPath}" + "${property}" `, newValue)
+        // console.log('context', context)
         if (context) {
           context[property] = newValue;
         }
