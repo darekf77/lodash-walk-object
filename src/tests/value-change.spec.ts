@@ -8,6 +8,33 @@ import { Log, Level } from 'ng2-logger';
 const log = Log.create('value change tests')
 describe('Walk.Object value change', () => {
 
+  it('Should change deep value', async () => {
+
+    const obj = {
+      Address: {
+        properties: {
+          user: {
+            $ref: 12
+          }
+        }
+      }
+    }
+
+
+    Helpers.Walk.Object(obj, (value, lodashPath, changeValue) => {
+      // console.log(lodashPath)
+      if (lodashPath.endsWith('$ref')) {
+        changeValue(13)
+      }
+    })
+
+    // console.log('obj',obj)
+
+    expect(obj['Address.properties.user.$ref']).to.be.undefined;
+    expect(obj.Address.properties.user.$ref).to.be.eq(13)
+
+  })
+
 
   it('Should change value in object', async () => {
 

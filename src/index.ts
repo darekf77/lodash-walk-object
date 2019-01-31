@@ -72,7 +72,7 @@ export class Helpers {
             if (p.endsWith(']')) {
               res = p.replace(/\[(\"|\')?[0-9]+(\"|\')?\]$/, '')
             } else {
-              res = p.replace(/\.([a-zA-Z0-9]|\_|\@|\-|\/|\:)+$/, '')
+              res = p.replace(/\.([a-zA-Z0-9]|\$|\_|\@|\-|\/|\:)+$/, '')
             }
             return res === p ? '' : res;
           }
