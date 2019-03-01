@@ -1,8 +1,6 @@
 {
-  "name": "lodash-walk-object",
-  "description": "Walk all properties deep in object with lodash help",
-  "version": "0.0.9",
   "tnp": {
+    "resources": [],
     "type": "isomorphic-lib",
     "isCommandLineToolOnly": true,
     "overrided": {
@@ -25,6 +23,9 @@
       ]
     }
   },
+  "name": "lodash-walk-object",
+  "description": "Walk all properties deep in object with lodash help",
+  "version": "0.0.9",
   "scripts": {
     "test": "mocha --require ts-node/register src/**/*.spec.ts",
     "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch"
@@ -42,5 +43,10 @@
   "bugs": {
     "url": "https://github.com/darekf77/lodash-walk-object/issues"
   },
-  "homepage": "https://github.com/darekf77/lodash-walk-object#readme"
+  "homepage": "https://github.com/darekf77/lodash-walk-object#readme",
+  "husky": {
+    "hooks": {
+      "pre-push": "tnp deps:show:if:standalone"
+    }
+  }
 }

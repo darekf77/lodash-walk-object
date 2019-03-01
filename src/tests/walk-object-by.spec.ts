@@ -111,6 +111,35 @@ describe('Walk.ObjectBy', () => {
 
   })
 
+  it('Should go through all properties , getters included', async () => {
+
+    let person = {
+      name: "Dariusz",
+      surname: "Filipiak"
+    } as any;
+
+    Object.defineProperty(person, 'fullName', {
+      get: function () {
+        return this.name + ' ' + this.surname;
+      }
+    });
+
+    // console.log(Object.getOwnPropertyNames(person))
+
+    // _.forOwn(person, (v, k) => {
+    //   console.log(k)
+    // })
+
+    const expectedPathes = ['name', 'surname', 'fullName'];
+    const actualPathes = []
+    Helpers.Walk.Object(person, (v, lodashPath) => {
+      actualPathes.push(lodashPath)
+    }, true)
+
+    expect(expectedPathes).to.deep.eq(actualPathes)
+
+  });
+
 
 });
 
