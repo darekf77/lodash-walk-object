@@ -1,18 +1,32 @@
 
 import * as _ from 'lodash';
-export type Iterator = (value: any, lodashPath: string, changeValueTo: (newValue) => void, isGetter?: boolean) => void
+
+export type AdditionalIteratorOptions = {
+  isGetter?: boolean,
+  walkGetters?: boolean;
+  exit?: () => void;
+}
+export type Iterator = (value: any,
+  lodashPath: string,
+  changeValueTo: (newValue) => void,
+  options?: AdditionalIteratorOptions
+
+) => void
 export class Helpers {
 
   public static get Walk() {
     const self = this;
     return {
-      Object(json: Object, iterator: Iterator, walkGetters = false) {
-        self._walk(json, json, iterator, void 0, void 0, walkGetters)
+      Object(json: Object, iterator: Iterator, optionsOrWalkGettersValue?: AdditionalIteratorOptions | boolean) {
+        if(_.isBoolean(optionsOrWalkGettersValue)) {
+          optionsOrWalkGettersValue = { walkGetters: optionsOrWalkGettersValue  }
+        }
+        self._walk(json, json, iterator, void 0, optionsOrWalkGettersValue)
       },
-      ObjectBy(property: string, inContext: Object, iterator: Iterator, walkGetters = false) {
+      ObjectBy(property: string, inContext: Object, iterator: Iterator, options?: AdditionalIteratorOptions | boolean) {
         iterator(inContext, '', self._changeValue(inContext, property, true))
         const json = inContext[property]
-        self.Walk.Object(json, iterator, walkGetters)
+        self.Walk.Object(json, iterator, options)
       }
     }
   }
@@ -81,31 +95,58 @@ export class Helpers {
     }
   }
 
-  private static _walk(json: Object, obj: Object, iterator: Iterator, lodashPath = '', isGetter = false, walkGetters = false): void {
-    if (lodashPath !== '') {
-      iterator(obj, lodashPath, this._changeValue(json, lodashPath), isGetter)
+  private static _exit = false;
+
+
+  private static _walk(json: Object, obj: Object, iterator: Iterator, lodashPath = '', options?: AdditionalIteratorOptions): void {
+
+    if (this._exit) {
+      return;
     }
+    if (!options) {
+      options = {};
+    }
+    options = _.merge({
+      walkGetters: false,
+      isGetter: false,
+      exit: () => {
+        this._exit = true;
+      }
+    }, options)
+
+    if (lodashPath !== '') {
+      iterator(obj, lodashPath, this._changeValue(json, lodashPath), options)
+    }
+    const { walkGetters } = options;
     if (Array.isArray(obj)) {
       obj.forEach((o, i) => {
-        this._walk(json, o, iterator, `${lodashPath}[${i}]`, false, walkGetters)
+        this._walk(json, o, iterator, `${lodashPath}[${i}]`, options)
       })
 
     } else if (_.isObject(obj)) {
       const allKeys = !walkGetters ? [] : Object.getOwnPropertyNames(obj);
       for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
+        if (_.isObject(obj) && obj.hasOwnProperty(key)) {
           _.pull(allKeys, key)
           const e = obj[key];
-          this._walk(json, e, iterator, `${(lodashPath === '') ? '' : `${lodashPath}.`}${key}`, false, walkGetters)
+          options.isGetter = false;
+          this._walk(json, e, iterator, `${(lodashPath === '') ? '' : `${lodashPath}.`}${key}`, options)
         }
       }
       if (walkGetters) {
         for (let index = 0; index < allKeys.length; index++) {
-          const key = allKeys[index];
-          const e = obj[key];
-          this._walk(json, e, iterator, `${(lodashPath === '') ? '' : `${lodashPath}.`}${key}`, true, walkGetters)
+          if (_.isObject(obj)) {
+            const key = allKeys[index];
+            const e = obj[key];
+            options.isGetter = true;
+            this._walk(json, e, iterator, `${(lodashPath === '') ? '' : `${lodashPath}.`}${key}`, options)
+          }
         }
       }
+    }
+
+    if (this._exit && json === obj) {
+      this._exit = false;
     }
   }
 
