@@ -1,4 +1,4 @@
-# WALK ALL PROPERTIES DEEP IN OBJECT AND CHANGE VALUES
+# WALK ALL PROPERTIES DEEP IN OBJECT
 
 This library let you go deep through all 
 properties in your javascript object with
