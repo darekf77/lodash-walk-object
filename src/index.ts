@@ -1,11 +1,16 @@
 
 import * as _ from 'lodash';
 
-export type AdditionalIteratorOptions = {
-  isGetter?: boolean,
+export interface StartIteratorOptions {
   walkGetters?: boolean;
+}
+
+export interface AdditionalIteratorOptions extends StartIteratorOptions {
+  skipObject?: () => void;
+  isGetter?: boolean;
   exit?: () => void;
 }
+
 export type Iterator = (value: any,
   lodashPath: string,
   changeValueTo: (newValue) => void,
@@ -17,13 +22,13 @@ export class Helpers {
   public static get Walk() {
     const self = this;
     return {
-      Object(json: Object, iterator: Iterator, optionsOrWalkGettersValue?: AdditionalIteratorOptions | boolean) {
-        if(_.isBoolean(optionsOrWalkGettersValue)) {
-          optionsOrWalkGettersValue = { walkGetters: optionsOrWalkGettersValue  }
+      Object(json: Object, iterator: Iterator, optionsOrWalkGettersValue?: StartIteratorOptions | boolean) {
+        if (_.isBoolean(optionsOrWalkGettersValue)) {
+          optionsOrWalkGettersValue = { walkGetters: optionsOrWalkGettersValue }
         }
-        self._walk(json, json, iterator, void 0, optionsOrWalkGettersValue)
+        self._walk(json, json, iterator, void 0, optionsOrWalkGettersValue as any)
       },
-      ObjectBy(property: string, inContext: Object, iterator: Iterator, options?: AdditionalIteratorOptions | boolean) {
+      ObjectBy(property: string, inContext: Object, iterator: Iterator, options?: StartIteratorOptions | boolean) {
         iterator(inContext, '', self._changeValue(inContext, property, true))
         const json = inContext[property]
         self.Walk.Object(json, iterator, options)
@@ -96,6 +101,7 @@ export class Helpers {
   }
 
   private static _exit = false;
+  private static _skip = false;
 
 
   private static _walk(json: Object, obj: Object, iterator: Iterator, lodashPath = '', options?: AdditionalIteratorOptions): void {
@@ -111,6 +117,9 @@ export class Helpers {
       isGetter: false,
       exit: () => {
         this._exit = true;
+      },
+      skipObject: () => {
+        this._skip = true;
       }
     }, options)
 
@@ -118,6 +127,11 @@ export class Helpers {
       iterator(obj, lodashPath, this._changeValue(json, lodashPath), options)
     }
     const { walkGetters } = options;
+    if (this._skip) {
+      this._skip = false;
+      return
+    }
+
     if (Array.isArray(obj)) {
       obj.forEach((o, i) => {
         this._walk(json, o, iterator, `${lodashPath}[${i}]`, options)
