@@ -1,15 +1,13 @@
 # WALK ALL PROPERTIES DEEP IN OBJECT AND CHANGE VALUES
 
-With this library you will go deep through all 
+This library let you go deep through all 
 properties in your javascript object with
-nice possibility to change their values
+nice possibility to change theirs values
 without confusion.
 
-In this library there are 2 basic functions:
+# WALK OBJECT
 
 **walk.Object( myJSObject, iteratorFunction )**
-
-and 
 
 **walk.ObjectBy( myObjectPropert, contextObject  , iteratorFunction )**
 
