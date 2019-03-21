@@ -134,7 +134,7 @@ describe('Walk.ObjectBy', () => {
     const actualPathes = []
     Helpers.Walk.Object(person, (v, lodashPath) => {
       actualPathes.push(lodashPath)
-    }, true)
+    }, {  walkGetters: true })
 
     expect(expectedPathes).to.deep.eq(actualPathes)
 

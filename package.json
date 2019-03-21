@@ -19,6 +19,7 @@
       ],
       "includeOnly": [
         "lodash",
+        "typescript-class-helpers",
         "@types/lodash"
       ]
     }

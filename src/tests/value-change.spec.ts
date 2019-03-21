@@ -214,7 +214,7 @@ describe('Walk.Object value change', () => {
       }
       // console.log(`Path: "${lodashPath}" `, v)
     })
-    log.i('d', d)
+    // log.i('d', d)
 
     expect(_.get(d, weirdPath)).to.eq(result)
     expect(Object.keys(d).length).to.be.eq(1)
