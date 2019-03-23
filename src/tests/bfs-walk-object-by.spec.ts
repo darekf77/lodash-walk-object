@@ -2,12 +2,14 @@ import * as _ from 'lodash';
 import { describe, before } from 'mocha'
 import { expect } from 'chai';
 import { Helpers } from '../index';
+import { Log } from 'ng2-logger';
+const log= Log.create('bfs walk by')
 
 // const instance = BrowserDB.instance;
 
-describe('Walk.ObjectBy', () => {
+describe('BFS Walk.ObjectBy', () => {
 
-  it('Should go through all properties depp in normal object', async () => {
+  it('BFS Should go through all properties depp in normal object', async () => {
 
     const d = {
       a: {
@@ -24,9 +26,9 @@ describe('Walk.ObjectBy', () => {
     const expectedPathes = [
       '',
       'a',
-      'a.c',
       'super',
       'names',
+      'a.c',
       'names[0]',
       'names[0].name'
     ]
@@ -40,7 +42,7 @@ describe('Walk.ObjectBy', () => {
     Helpers.Walk.ObjectBy('d', context, (v, lodashPath) => {
       actualPathes.push(lodashPath)
       // console.log(`Path: "${lodashPath}" `, v)
-    })
+    }, { breadthWalk: true })
 
 
     expect(expectedPathes).to.deep.eq(actualPathes)
@@ -48,7 +50,7 @@ describe('Walk.ObjectBy', () => {
   })
 
 
-  it('Should go through all properties depp in array', async () => {
+  it('BFS Should go through all properties depp in array', async () => {
 
     const d = {
       a: {
@@ -80,21 +82,21 @@ describe('Walk.ObjectBy', () => {
     ]
 
     const expectedPathes = [
-      '',
-      '[0]',
-      '[0].a',
-      '[0].a.c',
-      '[0].super',
-      '[0].names',
-      '[0].names[0]',
-      '[0].names[0].name',
-      '[1]',
-      '[1].a2',
-      '[1].a2.c2',
-      '[1].super2',
-      '[1].names2',
-      '[1].names2[0]',
-      '[1].names2[0].name'
+      "",
+      "[0]",
+      "[1]",
+      "[0].a",
+      "[0].super",
+      "[0].names",
+      "[1].a2",
+      "[1].super2",
+      "[1].names2",
+      "[0].a.c",
+      "[0].names[0]",
+      "[1].a2.c2",
+      "[1].names2[0]",
+      "[0].names[0].name",
+      "[1].names2[0].name"
     ]
 
     const actualPathes = []
@@ -105,13 +107,15 @@ describe('Walk.ObjectBy', () => {
 
     Helpers.Walk.ObjectBy('arr', context, (v, lodashPath) => {
       actualPathes.push(lodashPath)
-    })
+    }, { breadthWalk: true })
+
+    // log.i('actualPathes',actualPathes)
 
     expect(expectedPathes).to.deep.eq(actualPathes)
 
   })
 
-  it('Should go through all properties , getters included', async () => {
+  it('BFS Should go through all properties , getters included', async () => {
 
     let person = {
       name: "Dariusz",
@@ -134,7 +138,7 @@ describe('Walk.ObjectBy', () => {
     const actualPathes = []
     Helpers.Walk.Object(person, (v, lodashPath) => {
       actualPathes.push(lodashPath)
-    }, {  walkGetters: true })
+    }, { walkGetters: true, breadthWalk: true })
 
     expect(expectedPathes).to.deep.eq(actualPathes)
 

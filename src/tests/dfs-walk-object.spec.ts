@@ -74,9 +74,9 @@ export class User {
   }
 }
 
-describe('Walk.Object', () => {
+describe('DFS Walk.Object', () => {
 
-  it('Should go through all properties depp in normal object', async () => {
+  it('DFS Should go through all properties depp in normal object', async () => {
 
       const d = {
         a: {
@@ -113,7 +113,7 @@ describe('Walk.Object', () => {
 
 
 
-    it('Should go through all properties depp in array', async () => {
+    it('DFS Should go through all properties depp in array', async () => {
 
       const d = {
         a: {
@@ -171,7 +171,7 @@ describe('Walk.Object', () => {
 
     })
 
-    it('Should detect circural object', async () => {
+    it('DFS Should detect circural object', async () => {
 
       const a = {}
       const b = { a } as any;
@@ -193,7 +193,7 @@ describe('Walk.Object', () => {
       expect(circuralFounded).to.be.true;
     });
 
-    it('Should detect circural object when breath', async () => {
+    it('DFS Should detect circural object when breath', async () => {
 
       const a = {}
       const b = { a } as any;
@@ -215,7 +215,7 @@ describe('Walk.Object', () => {
       expect(circuralFounded).to.be.true;
     });
 
-    it('Circural refences should works ', async () => {
+    it('DFS Circural refences should works ', async () => {
 
       const a = {}
       const b = { a } as any;
@@ -239,50 +239,8 @@ describe('Walk.Object', () => {
     })
 
 
-    it('Should walk wide', async () => {
 
-      const d = {
-        super: {
-          hello: 1
-        }
-      }
-
-      const c = {
-        super2: {
-          hello2: 1,
-          hello21: 1
-        }
-      }
-
-      let arr = {
-        d,
-        c
-      }
-
-      const expectedPathes = [
-        'd',
-        'c',
-        'd.super',
-        'c.super2',
-        'd.super.hello',
-        'c.super2.hello2',
-        'c.super2.hello21'
-      ]
-
-      const actualPathes = []
-
-      Helpers.Walk.Object(arr, (v, lodashPath) => {
-        actualPathes.push(lodashPath)
-      }, { breadthWalk: true })
-
-      // console.log('actualPathes', actualPathes)
-
-      expect(expectedPathes).to.deep.eq(actualPathes)
-
-    })
-
-
-    it('Should handle include', async () => {
+    it('DFS Should handle include', async () => {
 
       const d = {
         a: {
@@ -332,7 +290,7 @@ describe('Walk.Object', () => {
     })
 
 
-    it('Should handle exclude', async () => {
+    it('DFS Should handle exclude', async () => {
 
       const d = {
         a: {

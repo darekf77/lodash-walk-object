@@ -6,7 +6,7 @@ import { Helpers } from '../index';
 // const instance = BrowserDB.instance;
 import { Log, Level } from 'ng2-logger';
 const log = Log.create('value change tests')
-describe('Walk.Object value change', () => {
+describe('DFS Walk.Object value change', () => {
 
   it('Should change deep value', async () => {
 

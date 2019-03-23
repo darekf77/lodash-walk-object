@@ -6,13 +6,8 @@ import { CLASS } from 'typescript-class-helpers';
 export type InDBType = { target: any; path: string; };
 export type Circ = { pathToObj: string; circuralTargetPath: string; };
 
-export type Vertice = {
-  value: any;
-  path: string;
-  level: number;
-  isCircural?: boolean;
-  isGetter?: boolean;
-};
+
+export type Ver = { v: any; p: string; parent: Ver; isGetter?: boolean; }
 
 export interface StartIteratorOptions {
   walkGetters?: boolean;
@@ -24,6 +19,36 @@ export interface StartIteratorOptions {
   breadthWalk?: boolean;
   include?: string[];
   exclude?: string[];
+}
+
+function findChildren(ver: Ver, lp: string, walkGetters: boolean): Ver[] {
+  const o = ver.v;
+  if (_.isArray(o)) {
+    return o.map((v, i) => {
+      return { v, p: `${lp}[${i}]`, parent: ver, isGetter: false }
+    });
+  } else if (_.isObject(o)) {
+
+    const obj = o;
+    const allKeys = !walkGetters ? [] : Object.getOwnPropertyNames(obj);
+    const children: Ver[] = [];
+    for (const key in obj) {
+      if (_.isObject(obj) && obj.hasOwnProperty(key)) {
+        _.pull(allKeys, key)
+        children.push({ v: o[key], p: `${(lp === '') ? '' : `${lp}.`}${key}`, parent: o, isGetter: false })
+      }
+    }
+    if (walkGetters) {
+      for (let index = 0; index < allKeys.length; index++) {
+        if (_.isObject(obj)) {
+          const key = allKeys[index];
+          children.push({ v: o[key], p: `${(lp === '') ? '' : `${lp}.`}${key}`, parent: o, isGetter: true })
+        }
+      }
+    }
+    return children;
+  }
+  return [];
 }
 
 export interface AdditionalIteratorOptions extends StartIteratorOptions {
@@ -41,7 +66,6 @@ export interface InternalValues extends AdditionalIteratorOptions {
   db?: any;
   stack?: any[];
   circural?: Circ[];
-  verticies?: Vertice[];
   hasIterator?: boolean;
   _skip: boolean;
   _exit: boolean;
@@ -70,26 +94,10 @@ export class Helpers {
           optionsOrWalkGettersValue.breadthWalk = false;
         }
 
-        let { circural, verticies, breadthWalk, hasIterator } = self._walk(json, json, iterator, void 0, optionsOrWalkGettersValue as any)
-        if (breadthWalk) {
-          const toSkip: string[] = []
-          verticies = _.sortBy(verticies, ['level']);
-          // console.log(verticies)
-          for (let index = 0; index < verticies.length; index++) {
-            const { value, path, isCircural, isGetter } = verticies[index];
-            let exit = false;
-            if (!_.isUndefined(toSkip.find(s => s.startsWith(path)))) {
-              continue;
-            }
-            if (hasIterator) {
-              iterator(value, path, self._changeValue(json, path),
-                { isGetter, isCircural, skipObject: () => { toSkip.push(path) }, exit: () => { exit = true; } })
-            }
-            if (exit) {
-              break;
-            }
-          }
-        }
+        let {
+          circural
+        } = self._walk(json, json, iterator, void 0, optionsOrWalkGettersValue as any)
+
         return { circs: circural }
       },
       ObjectBy(property: string, inContext: Object, iterator: Iterator, options?: StartIteratorOptions) {
@@ -183,9 +191,6 @@ export class Helpers {
   }
 
   private static prepareOptions(options: InternalValues, obj, lodashPath) {
-    if (!options) {
-      options = {} as any;
-    }
 
     if (options._exit) {
       return;
@@ -237,10 +242,6 @@ export class Helpers {
       }
     }
 
-    if (_.isUndefined(options.verticies)) {
-      options.verticies = []
-    }
-
     const { db, stack } = options;
     options.isCircural = false;
 
@@ -289,76 +290,113 @@ export class Helpers {
 
   private static _walk(json: Object, obj: Object, iterator: Iterator, lodashPath = '',
     options?: InternalValues, depthLevel = 0) {
-    // console.log(lodashPath)
-    // if (counter++ === 50) {
-    //   console.log('KURWA')
-    //   process.exit(0)
-    // }
 
-    options = this.prepareOptions(options, obj, lodashPath)
-
-    if (this._shoudlReturn(options.include, options.exclude, lodashPath)) {
-      return;
+    if (!options) {
+      options = {} as any;
     }
 
-    if (lodashPath !== '') {
-      if (options.breadthWalk) {
-        options.verticies.push({
-          level: depthLevel,
-          path: lodashPath,
-          isCircural: options.isCircural,
-          isGetter: options.isGetter,
-          value: obj
-        })
-      } else {
-        if (options.hasIterator) {
-          iterator(obj, lodashPath, this._changeValue(json, lodashPath), options)
-        }
+    if (!options.breadthWalk) {
+
+      options = this.prepareOptions(options, obj, lodashPath)
+
+      if (this._shoudlReturn(options.include, options.exclude, lodashPath)) {
+        return;
       }
-    }
 
-    if (options.isCircural) {
+      if (options.hasIterator && lodashPath !== '') {
+        iterator(obj, lodashPath, this._changeValue(json, lodashPath), options)
+      }
+
+      if (options.isCircural) {
+        if (options._skip) {
+          options._skip = false;
+        }
+        return;
+      }
+
+
       if (options._skip) {
         options._skip = false;
+        return
       }
-      return;
     }
 
-    const { walkGetters, verticies } = options;
-    if (options._skip) {
-      options._skip = false;
-      return
-    }
 
-    if (Array.isArray(obj)) {
-      obj.forEach((o, i) => {
-        this._walk(json, obj[i], iterator, `${lodashPath}[${i}]`, options, depthLevel + 1)
-      })
 
-    } else if (_.isObject(obj)) {
-      const allKeys = !walkGetters ? [] : Object.getOwnPropertyNames(obj);
-      for (const key in obj) {
-        if (_.isObject(obj) && obj.hasOwnProperty(key)) {
-          _.pull(allKeys, key)
+    if (options.breadthWalk) {
 
-          options.isGetter = false;
-          this._walk(json, obj[key], iterator, `${(lodashPath === '') ? '' : `${lodashPath}.`}${key}`, options, depthLevel + 1)
+      let queue: Ver[] = [{ v: json, p: lodashPath, parent: void 0 }];
+      const toSkip: Ver[] = [];
+      while (queue.length > 0) {
+
+        const ver = queue.shift();
+
+        if (toSkip.includes(ver.parent)) {
+          continue;
+        }
+
+        let { v, p } = ver;
+        options = this.prepareOptions(options, v, p)
+
+        if (this._shoudlReturn(options.include, options.exclude, p)) {
+          toSkip.push(ver)
+          continue;
+        }
+
+        if (options._exit) {
+          return options;
+        }
+        if (options.hasIterator && p !== '') {
+          iterator(v, p, this._changeValue(json, p), options);
+        }
+
+        if (options._skip) {
+          options._skip = false;
+          toSkip.push(ver)
+          continue;
+        }
+
+        if (_.isArray(v)) {
+          queue = queue.concat(findChildren(ver, p, options.walkGetters))
+        } else if (_.isObject(v)) {
+          queue = queue.concat(findChildren(ver, p, options.walkGetters))
         }
       }
-      if (walkGetters) {
-        for (let index = 0; index < allKeys.length; index++) {
-          if (_.isObject(obj)) {
-            const key = allKeys[index];
 
-            options.isGetter = true;
+    } else {
+      const { walkGetters } = options;
+
+      if (Array.isArray(obj)) {
+        obj.forEach((o, i) => {
+          this._walk(json, obj[i], iterator, `${lodashPath}[${i}]`, options, depthLevel + 1)
+        })
+
+      } else if (_.isObject(obj)) {
+        const allKeys = !walkGetters ? [] : Object.getOwnPropertyNames(obj);
+        for (const key in obj) {
+          if (_.isObject(obj) && obj.hasOwnProperty(key)) {
+            _.pull(allKeys, key)
+
+            options.isGetter = false;
             this._walk(json, obj[key], iterator, `${(lodashPath === '') ? '' : `${lodashPath}.`}${key}`, options, depthLevel + 1)
           }
         }
-      }
-    }
+        if (walkGetters) {
+          for (let index = 0; index < allKeys.length; index++) {
+            if (_.isObject(obj)) {
+              const key = allKeys[index];
 
-    if (options._exit && json === obj) {
-      options._exit = false;
+              options.isGetter = true;
+              this._walk(json, obj[key], iterator, `${(lodashPath === '') ? '' : `${lodashPath}.`}${key}`, options, depthLevel + 1)
+            }
+          }
+        }
+      }
+
+      if (options._exit && json === obj) {
+        options._exit = false;
+      }
+
     }
 
     return options;
