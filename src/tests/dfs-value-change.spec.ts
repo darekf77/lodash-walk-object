@@ -8,6 +8,57 @@ import { Log, Level } from 'ng2-logger';
 const log = Log.create('value change tests')
 describe('DFS Walk.Object value change', () => {
 
+  it('DFS should iterate new object', () => {
+
+
+    const a = {
+      b: {
+        b_value1: 'b_value1',
+        b_value2: 'b_value2',
+      }
+    }
+
+    const actualPathes = []
+    Helpers.Walk.Object(a, (value, lodashPath, change, { }) => {
+      actualPathes.push(lodashPath)
+      if (lodashPath === 'b') {
+        change({
+          c_value1: 'c_value1',
+          c_value2: 'c_value2',
+        })
+      }
+    })
+    // console.log(actualPathes)
+    expect(actualPathes).to.be.deep.eq(['b', 'b.c_value1', 'b.c_value2']);
+  })
+
+
+  it('DFS should iterate new object array', () => {
+
+
+    const a = {
+      b: [
+        'b_value1',
+        'b_value2',
+      ]
+    }
+
+    const actualPathes = []
+    Helpers.Walk.Object(a, (value, lodashPath, change, { }) => {
+      actualPathes.push(lodashPath)
+      if (lodashPath === 'b') {
+        change([
+          { c1: 'c1' },
+          { c2: 'c2' }
+        ])
+      }
+    })
+    // console.log(actualPathes)
+    expect(actualPathes).to.be.deep.eq(['b', 'b[0]', 'b[0].c1', 'b[1]', 'b[1].c2']);
+
+  })
+
+
   it('Should change deep value', async () => {
 
     const obj = {

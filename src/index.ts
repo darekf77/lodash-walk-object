@@ -2,47 +2,31 @@
 import * as _ from 'lodash';
 import { CLASS } from 'typescript-class-helpers';
 // let counter = 0
+import { Models } from './models';
+export * from './models';
 
-export type InDBType = { target: any; path: string; };
-export type Circ = { pathToObj: string; circuralTargetPath: string; };
+function findChildren(ver: Models.Ver, lp: string, walkGetters: boolean): Models.Ver[] {
 
-
-export type Ver = { v: any; p: string; parent: Ver; isGetter?: boolean; }
-
-export interface StartIteratorOptions {
-  walkGetters?: boolean;
-
-  /**
-   * Default in breadhTwalk
-   */
-  checkCircural?: boolean;
-  breadthWalk?: boolean;
-  include?: string[];
-  exclude?: string[];
-}
-
-function findChildren(ver: Ver, lp: string, walkGetters: boolean): Ver[] {
-  const o = ver.v;
-  if (_.isArray(o)) {
-    return o.map((v, i) => {
+  const obj = ver.v
+  if (_.isArray(obj)) {
+    return obj.map((v, i) => {
       return { v, p: `${lp}[${i}]`, parent: ver, isGetter: false }
     });
-  } else if (_.isObject(o)) {
+  } else if (_.isObject(obj)) {
 
-    const obj = o;
     const allKeys = !walkGetters ? [] : Object.getOwnPropertyNames(obj);
-    const children: Ver[] = [];
+    const children: Models.Ver[] = [];
     for (const key in obj) {
       if (_.isObject(obj) && obj.hasOwnProperty(key)) {
         _.pull(allKeys, key)
-        children.push({ v: o[key], p: `${(lp === '') ? '' : `${lp}.`}${key}`, parent: o, isGetter: false })
+        children.push({ v: obj[key], p: `${(lp === '') ? '' : `${lp}.`}${key}`, parent: ver, isGetter: false })
       }
     }
     if (walkGetters) {
       for (let index = 0; index < allKeys.length; index++) {
         if (_.isObject(obj)) {
           const key = allKeys[index];
-          children.push({ v: o[key], p: `${(lp === '') ? '' : `${lp}.`}${key}`, parent: o, isGetter: true })
+          children.push({ v: obj[key], p: `${(lp === '') ? '' : `${lp}.`}${key}`, parent: ver, isGetter: true })
         }
       }
     }
@@ -51,30 +35,12 @@ function findChildren(ver: Ver, lp: string, walkGetters: boolean): Ver[] {
   return [];
 }
 
-export interface AdditionalIteratorOptions extends StartIteratorOptions {
-  skipObject?: () => void;
-  isGetter?: boolean;
-  /**
-   * Breadth walk will skip content of circural objects
-   */
-  isCircural?: boolean;
-  exit?: () => void;
 
-}
-
-export interface InternalValues extends AdditionalIteratorOptions {
-  db?: any;
-  stack?: any[];
-  circural?: Circ[];
-  hasIterator?: boolean;
-  _skip: boolean;
-  _exit: boolean;
-}
 
 export type Iterator = (value: any,
   lodashPath: string,
   changeValueTo: (newValue) => void,
-  options?: AdditionalIteratorOptions
+  options?: Models.AdditionalIteratorOptions
 
 ) => void
 export class Helpers {
@@ -82,13 +48,13 @@ export class Helpers {
   public static get Walk() {
     const self = this;
     return {
-      Object(json: Object, iterator: Iterator, optionsOrWalkGettersValue?: StartIteratorOptions) {
+      Object(json: Object, iterator: Iterator, optionsOrWalkGettersValue?: Models.StartIteratorOptions) {
 
         if (_.isUndefined(optionsOrWalkGettersValue)) {
           optionsOrWalkGettersValue = {}
         }
 
-        (optionsOrWalkGettersValue as InternalValues).hasIterator = _.isFunction(iterator)
+        (optionsOrWalkGettersValue as Models.InternalValues).hasIterator = _.isFunction(iterator)
 
         if (_.isUndefined(optionsOrWalkGettersValue.breadthWalk)) {
           optionsOrWalkGettersValue.breadthWalk = false;
@@ -100,7 +66,7 @@ export class Helpers {
 
         return { circs: circural }
       },
-      ObjectBy(property: string, inContext: Object, iterator: Iterator, options?: StartIteratorOptions) {
+      ObjectBy(property: string, inContext: Object, iterator: Iterator, options?: Models.StartIteratorOptions) {
         if (_.isFunction(iterator)) {
           iterator(inContext, '', self._changeValue(inContext, property, true))
         }
@@ -110,7 +76,7 @@ export class Helpers {
     }
   }
 
-  private static _changeValue(json: Object, lodahPath: string, simpleChange = false) {
+  private static _changeValue(json: Object, lodahPath: string, simpleChange = false, options?: Models.InternalValues) {
 
     var { contextPath, property } = this._prepareParams(lodahPath);
     var context = _.get(json, contextPath);
@@ -121,7 +87,6 @@ export class Helpers {
       }
 
       if (simpleChange) {
-        // console.log(`SIMPLE VALUE CHANGE!  "${contextPath}" + "${property}" `, newValue)
         json[property] = newValue;
       } else {
         // console.log(`CONTEXT VALUE CHANGE!  "${contextPath}" + "${property}" `, newValue)
@@ -130,7 +95,9 @@ export class Helpers {
           context[property] = newValue;
         }
       }
-
+      if (options) {
+        options._valueChanged = true;
+      }
     }
   }
 
@@ -190,7 +157,7 @@ export class Helpers {
     return res;
   }
 
-  private static prepareOptions(options: InternalValues, obj, lodashPath) {
+  private static prepareOptions(options: Models.InternalValues, obj, lodashPath) {
 
     if (options._exit) {
       return;
@@ -206,6 +173,10 @@ export class Helpers {
 
     if (_.isUndefined(options.isGetter)) {
       options.isGetter = false;
+    }
+
+    if (_.isUndefined(options._valueChanged)) {
+      options._valueChanged = false;
     }
 
     if (_.isUndefined(options._exit)) {
@@ -250,10 +221,10 @@ export class Helpers {
       if (CLASS.OBJECT(obj).isClassObject && !_.isUndefined(indexValue)) {
         let className = CLASS.getNameFromObject(obj);
         let p = `${className}.id_${indexValue}`;
-        const inDB: InDBType = _.get(db, p);
+        const inDB: Models.InDBType = _.get(db, p);
 
         if (inDB && CLASS.OBJECT(inDB.target).isEqual(obj)) {
-          const circ: Circ = {
+          const circ: Models.Circ = {
             pathToObj: lodashPath,
             circuralTargetPath: inDB.path
           }
@@ -263,14 +234,14 @@ export class Helpers {
           _.set(db, p, {
             path: lodashPath,
             target: obj
-          } as InDBType)
+          } as Models.InDBType)
         }
 
       } else {
-        const inStack = stack.find((c: InDBType) => c.target == obj);
+        const inStack = stack.find((c: Models.InDBType) => c.target == obj);
 
         if (!_.isUndefined(inStack)) {
-          const circ: Circ = {
+          const circ: Models.Circ = {
             pathToObj: lodashPath,
             circuralTargetPath: inStack.path
           }
@@ -280,7 +251,7 @@ export class Helpers {
           stack.push({
             path: lodashPath,
             target: obj
-          } as InDBType);
+          } as Models.InDBType);
         }
 
       }
@@ -289,7 +260,7 @@ export class Helpers {
   }
 
   private static _walk(json: Object, obj: Object, iterator: Iterator, lodashPath = '',
-    options?: InternalValues, depthLevel = 0) {
+    options?: Models.InternalValues, depthLevel = 0) {
 
     if (!options) {
       options = {} as any;
@@ -304,16 +275,17 @@ export class Helpers {
       }
 
       if (options.hasIterator && lodashPath !== '') {
-        iterator(obj, lodashPath, this._changeValue(json, lodashPath), options)
+        iterator(obj, lodashPath, this._changeValue(json, lodashPath, false, options), options)
       }
+
+      if (options._valueChanged) {
+        obj = _.get(json, lodashPath)
+      }
+      options._valueChanged = false;
 
       if (options.isCircural) {
-        if (options._skip) {
-          options._skip = false;
-        }
-        return;
+        options._skip = true;
       }
-
 
       if (options._skip) {
         options._skip = false;
@@ -325,37 +297,52 @@ export class Helpers {
 
     if (options.breadthWalk) {
 
-      let queue: Ver[] = [{ v: json, p: lodashPath, parent: void 0 }];
-      const toSkip: Ver[] = [];
+      let queue: Models.Ver[] = [{ v: json, p: lodashPath, parent: void 0 }];
+
+      // const pathesToSkip = {};
       while (queue.length > 0) {
 
         const ver = queue.shift();
-
-        if (toSkip.includes(ver.parent)) {
+        // console.log(`pathes to skip`, pathesToSkip);
+        // if (!_.isUndefined(Object.keys(pathesToSkip).find(key => ver.p.startsWith(pathesToSkip[key])))) {
+        // console.log(`skip: ${ver.p}`)
+        // continue;
+        // }
+        if (this._shoudlReturn(options.include, options.exclude, ver.p)) {
+          // pathesToSkip[ver.p] = true;
+          // console.log(`skip2: ${ver.p}`)
           continue;
         }
+
+        // console.log(`not skip value ${ver.p}`)
 
         let { v, p } = ver;
         options = this.prepareOptions(options, v, p)
 
-        if (this._shoudlReturn(options.include, options.exclude, p)) {
-          toSkip.push(ver)
-          continue;
-        }
-
         if (options._exit) {
+          console.log('EXIT')
           return options;
         }
         if (options.hasIterator && p !== '') {
-          iterator(v, p, this._changeValue(json, p), options);
+          iterator(v, p, this._changeValue(json, p, false, options), options);
+        }
+
+        if (options._valueChanged) {
+          ver.v = _.get(json, p);
+        }
+        options._valueChanged = false;
+
+        if (options.isCircural) {
+          // pathesToSkip[ver.p] = true;
+          continue;
         }
 
         if (options._skip) {
           options._skip = false;
-          toSkip.push(ver)
+          // pathesToSkip[ver.p] = true;
           continue;
         }
-
+        // console.log(`LOOK FOR CHILDREN OF ${ver.p}`)
         if (_.isArray(v)) {
           queue = queue.concat(findChildren(ver, p, options.walkGetters))
         } else if (_.isObject(v)) {

@@ -76,6 +76,56 @@ export class User {
 
 describe('BFS Walk.Object', () => {
 
+  it('BFS should iterate new object', () => {
+
+
+    const a = {
+      b: {
+        b_value1: 'b_value1',
+        b_value2: 'b_value2',
+      }
+    }
+
+    const actualPathes = []
+    Helpers.Walk.Object(a, (value, lodashPath, change, { }) => {
+      actualPathes.push(lodashPath)
+      if (lodashPath === 'b') {
+        change({
+          c_value1: 'c_value1',
+          c_value2: 'c_value2',
+        })
+      }
+    }, { breadthWalk: true })
+    // console.log(actualPathes)
+    expect(actualPathes).to.be.deep.eq(['b', 'b.c_value1', 'b.c_value2']);
+  })
+
+
+  it('BFS should iterate new object array', () => {
+
+
+    const a = {
+      b: [
+        'b_value1',
+        'b_value2',
+      ]
+    }
+
+    const actualPathes = []
+    Helpers.Walk.Object(a, (value, lodashPath, change, { }) => {
+      actualPathes.push(lodashPath)
+      if (lodashPath === 'b') {
+        change([
+          { c1: 'c1' },
+          { c2: 'c2' }
+        ])
+      }
+    }, { breadthWalk: true })
+    // console.log(actualPathes)
+    expect(actualPathes).to.be.deep.eq(['b', 'b[0]', 'b[1]', 'b[0].c1', 'b[1].c2']);
+
+  })
+
   it('BFS Should go through all properties depp in normal object', async () => {
 
 
