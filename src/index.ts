@@ -68,7 +68,7 @@ export class Helpers {
       },
       ObjectBy(property: string, inContext: Object, iterator: Iterator, options?: Models.StartIteratorOptions) {
         if (_.isFunction(iterator)) {
-          iterator(inContext, '', self._changeValue(inContext, property, true))
+          iterator(inContext, '', self._changeValue(inContext, property, true)) // TODO Add optoins
         }
         const json = inContext[property]
         return self.Walk.Object(json, iterator, options)
