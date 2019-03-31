@@ -26,7 +26,7 @@
   },
   "name": "lodash-walk-object",
   "description": "Walk all properties deep in object with lodash help",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "scripts": {
     "test": "mocha --require ts-node/register src/**/*.spec.ts",
     "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch"
