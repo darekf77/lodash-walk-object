@@ -10,7 +10,9 @@ import { CLASS } from 'typescript-class-helpers';
 // const instance = BrowserDB.instance;
 
 
-@CLASS.NAME('Proj', 'location')
+@CLASS.NAME('Proj', {
+  uniqueKey: 'location'
+})
 class Proj {
   static locationsID = 0;
   constructor() {
