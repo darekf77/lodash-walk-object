@@ -20,7 +20,9 @@
         "lodash",
         "typescript-class-helpers",
         "@types/lodash"
-      ]
+      ],
+      "ignoreDepsPattern": [],
+      "dependencies": {}
     }
   },
   "name": "lodash-walk-object",
