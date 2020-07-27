@@ -13,7 +13,12 @@
       "ignoreDepsPattern": [],
       "dependencies": {}
     },
-    "linkedProjects": []
+    "linkedProjects": [],
+    "libReleaseOptions": {
+      "nodts": false,
+      "obscure": false,
+      "ugly": false
+    }
   },
   "name": "lodash-walk-object",
   "description": "Walk all properties deep in object with lodash help",
