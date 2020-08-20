@@ -112,7 +112,7 @@
     "angular-tree-component": "^7.0.0",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
-    "bcrypt": "3.0.6",
+    "bcrypt": "5.0.0",
     "body-parser": "^1.18.2",
     "bootstrap": "4.3.1",
     "callsite-record": "4.1.3",
