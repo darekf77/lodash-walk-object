@@ -16,7 +16,6 @@ testem.log
 .DS_Store
 Thumbs.db
 /node_modules
-/tnp-system-path.txt
 /tmp*
 /dist*
 /bundle*
@@ -32,6 +31,10 @@ Thumbs.db
 /npm-debug.log*
 /.sass-cache
 /.sourcemaps
+/tsconfig.isomorphic.json
+/tsconfig.browser.json
+/.vscode/launch.json
+/.vscode/tasks.json
 /tsconfig.json
 /.npmrc
 /tslint.json
@@ -39,11 +42,17 @@ Thumbs.db
 /index.js
 /index.d.ts
 /index.js.map
-/.vscode/launch.json
-/tsconfig.browser.json
 /webpack.config.js
+/webpack.backend-bundle-build.js
 /run.js
+/tsconfig.isomorphic.json.filetemplate
+/tsconfig.browser.json.filetemplate
+/.vscode/launch.json.filetemplate
+/.vscode/tasks.json.filetemplate
 /tsconfig.json.filetemplate
 
-!*.filetemplate
 
+
+
+# =====================
+*.filetemplate
