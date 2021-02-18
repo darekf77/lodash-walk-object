@@ -199,7 +199,7 @@
     "karma-jasmine": "~3.0.1",
     "karma-jasmine-html-reporter": "^1.4.2",
     "lockfile": "^1.0.4",
-    "lodash-walk-object": "~1.0.7",
+    "lodash-walk-object": "~1.0.8",
     "lowdb": "^1.0.0",
     "material-design-icons": "3.0.1",
     "method-override": "^2.3.10",
@@ -291,5 +291,5 @@
   },
   "license": "MIT",
   "private": false,
-  "lastBuildTagHash": "b4ee41b648c1f853f0b1fba36d6cda82a2af68b1"
+  "lastBuildTagHash": "c326e31bdcdfffca28efffbe92b560cf4570abb5"
 }
