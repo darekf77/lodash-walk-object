@@ -1,5 +1,3 @@
-
-
 export namespace Models {
 
   export type InDBType = { target: any; path: string; };

@@ -5,9 +5,7 @@
   "overrided": {
     "includeAsDev": "*",
     "includeOnly": [
-      "lodash",
-      "typescript-class-helpers",
-      "@types/lodash"
+      "typescript-class-helpers"
     ],
     "ignoreDepsPattern": [],
     "dependencies": {},

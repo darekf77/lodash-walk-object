@@ -1,5 +1,4 @@
-
-import * as _ from 'lodash';
+import { _ } from 'tnp-core';
 import { CLASS } from 'typescript-class-helpers';
 // let counter = 0
 import { Models } from './models';
