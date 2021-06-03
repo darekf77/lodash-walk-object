@@ -202,7 +202,7 @@
     "lnk": "~1.0.1",
     "lockfile": "^1.0.4",
     "lodash": "^4.17.4",
-    "lodash-walk-object": "~1.0.14",
+    "lodash-walk-object": "~1.0.15",
     "lowdb": "^1.0.0",
     "magic-renamer": "~0.0.4",
     "material-design-icons": "3.0.1",
@@ -298,5 +298,5 @@
   },
   "license": "MIT",
   "private": false,
-  "lastBuildTagHash": "55204c1a8d90dc6039ad9c1bdff546bb5b5c1157\n55204c1a8d90dc6039ad9c1bdff546bb5b5c1157"
+  "lastBuildTagHash": "a76b199bf7d63a440c8c31408fb1da0c153263e5"
 }
