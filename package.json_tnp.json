@@ -30,5 +30,6 @@
     "ng2-rest",
     "docs",
     "documentation"
-  ]
+  ],
+  "workerPlugins": {}
 }
