@@ -4,6 +4,7 @@ export namespace Models {
   export type Circ = { pathToObj: string; circuralTargetPath: string; };
 
 
+  // @ts-ignore
   export type Ver = { v: any; p: string; parent: Ver; isGetter?: boolean; }
 
   export interface StartIteratorOptions {
