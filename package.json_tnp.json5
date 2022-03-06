@@ -1,35 +1,30 @@
 {
-  "resources": [],
-  "overrided": {
-    "includeAsDev": "*",
-    "includeOnly": [
-      "typescript-class-helpers"
-    ],
-    "ignoreDepsPattern": [],
-    "dependencies": {},
-    "linkedFolders": []
+  resources: [],
+  overrided: {
+    includeAsDev: "*",
+    includeOnly: ["typescript-class-helpers"],
+    ignoreDepsPattern: [],
+    dependencies: {},
+    linkedFolders: [],
   },
-  "linkedProjects": [],
-  "libReleaseOptions": {
-    "nodts": false,
-    "obscure": false,
-    "ugly": false
+  linkedProjects: [],
+  libReleaseOptions: {
+    nodts: false,
+    obscure: false,
+    ugly: false,
   },
-  "type": "isomorphic-lib",
-  "version": "v3",
-  "license": "MIT",
-  "private": false,
-  "scripts": {
-    "test": "mocha --require ts-node/register src/**/*.spec.ts",
-    "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch"
+  type: "isomorphic-lib",
+  version: "v3",
+  additionalNpmNames: ["firedev-walk-object"],
+  license: "MIT",
+  private: false,
+  scripts: {
+    test: "mocha --require ts-node/register src/**/*.spec.ts",
+    "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch",
   },
-  "description": "Walk all properties deep in object with lodash help",
-  "author": "Dariusz Filipiak",
-  "homepage": "https://github.com/darekf77/lodash-walk-object#readme",
-  "keywords": [
-    "ng2-rest",
-    "docs",
-    "documentation"
-  ],
-  "workerPlugins": {}
+  description: "Walk all properties deep in object with lodash help",
+  author: "Dariusz Filipiak",
+  homepage: "https://github.com/darekf77/lodash-walk-object#readme",
+  keywords: ["ng2-rest", "docs", "documentation"],
+  workerPlugins: {},
 }
