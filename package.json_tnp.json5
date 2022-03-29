@@ -1,7 +1,7 @@
 {
   resources: [],
   overrided: {
-    includeAsDev: "*",
+    includeAsDev: [],
     includeOnly: ["typescript-class-helpers"],
     ignoreDepsPattern: [],
     dependencies: {},
