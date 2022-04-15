@@ -1,7 +1,7 @@
 {
   "name": "lodash-walk-object",
   "description": "Walk all properties deep in object with lodash help",
-  "version": "13.0.9",
+  "version": "13.0.10",
   "scripts": {
     "test": "mocha --require ts-node/register src/**/*.spec.ts",
     "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch"
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/darekf77/lodash-walk-object#readme",
   "dependencies": {
-    "typescript-class-helpers": "~13.0.9"
+    "typescript-class-helpers": "~13.0.10"
   },
   "license": "MIT",
   "private": false,
@@ -185,10 +185,10 @@
     "mkdirp": "0.5.1",
     "mocha": "5.2.0",
     "moment": "2.22.2",
-    "morphi": "~13.0.17",
+    "morphi": "~13.0.20",
     "ng-packagr": "13.0.0",
     "ng-talkback": "~13.0.8",
-    "ng2-logger": "~13.0.9",
+    "ng2-logger": "~13.0.10",
     "ng2-rest": "~13.0.12",
     "ng4-icons": "~13.0.10",
     "ng4-modal": "~13.0.12",
@@ -232,9 +232,9 @@
     "sudo-block": "3.0.0",
     "systeminformation": "3.45.7",
     "task.js": "0.1.5",
-    "tnp-cli": "~13.0.10",
-    "tnp-config": "~13.0.14",
-    "tnp-core": "~13.0.31",
+    "tnp-cli": "~13.0.11",
+    "tnp-config": "~13.0.15",
+    "tnp-core": "~13.0.34",
     "tnp-db": "~13.0.19",
     "tnp-helpers": "~13.0.16",
     "tnp-models": "~13.0.12",
