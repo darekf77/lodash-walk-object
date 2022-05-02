@@ -25,7 +25,7 @@
   },
   "license": "MIT",
   "private": false,
-  "lastBuildTagHash": "c1fc92d0c21630623b00dc2b1fd17a0052767c6f",
+  "lastBuildTagHash": "fb55fb9fd8b93e1ba9116e1c98037dbbb0723fd3",
   "devDependencies": {
     "@angular-devkit/build-angular": "~13.2.5",
     "@angular/animations": "~13.2.0",
@@ -172,7 +172,7 @@
     "lnk": "1.0.1",
     "lockfile": "1.0.4",
     "lodash": "4.17.4",
-    "lodash-walk-object": "~13.0.13",
+    "lodash-walk-object": "~13.0.14",
     "lodash.get": ">= 4",
     "lodash.isequal": ">= 4",
     "lodash.merge": ">= 4",
