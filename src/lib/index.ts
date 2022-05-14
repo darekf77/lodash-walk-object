@@ -16,7 +16,7 @@ function findChildren(ver: Models.Ver, lp: string, walkGetters: boolean): Models
     const allKeys = !walkGetters ? [] : Object.getOwnPropertyNames(obj);
     const children: Models.Ver[] = [];
     for (const key in obj) {
-      if (_.isObject(obj) && obj.hasOwnProperty(key)) {
+      if (_.isObject(obj) && _.isFunction(obj.hasOwnProperty) && obj.hasOwnProperty(key)) {
         _.pull(allKeys, key)
         children.push({ v: obj[key], p: `${(lp === '') ? '' : `${lp}.`}${key}`, parent: ver, isGetter: false })
       }
