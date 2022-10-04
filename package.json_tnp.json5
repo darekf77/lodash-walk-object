@@ -1,5 +1,6 @@
 {
   resources: [],
+
   overrided: {
     includeAsDev: [],
     includeOnly: ["typescript-class-helpers"],
@@ -7,21 +8,27 @@
     dependencies: {},
     linkedFolders: [],
   },
+
   linkedProjects: [],
+  linkedRepos: [],
+
   libReleaseOptions: {
     nodts: false,
     obscure: false,
     ugly: false,
   },
+
   type: "isomorphic-lib",
   version: "v3",
   additionalNpmNames: ["firedev-walk-object"],
   license: "MIT",
   private: false,
+
   scripts: {
     test: "mocha --require ts-node/register src/**/*.spec.ts",
     "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch",
   },
+
   description: "Walk all properties deep in object with lodash help",
   author: "Dariusz Filipiak",
   homepage: "https://github.com/darekf77/lodash-walk-object#readme",
