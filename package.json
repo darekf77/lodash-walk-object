@@ -1,7 +1,7 @@
 {
   "name": "lodash-walk-object",
   "description": "Walk all properties deep in object with lodash help",
-  "version": "13.1.38",
+  "version": "13.1.39",
   "scripts": {
     "test": "mocha --require ts-node/register src/**/*.spec.ts",
     "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch"
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/darekf77/lodash-walk-object#readme",
   "dependencies": {
-    "typescript-class-helpers": "~13.2.3"
+    "typescript-class-helpers": "~13.2.4"
   },
   "license": "MIT",
   "private": false,
@@ -158,7 +158,7 @@
     "http-proxy": "1.16.2",
     "http-proxy-middleware": "0.19.1",
     "http-server": "0.11.1",
-    "incremental-compiler": "~13.1.18",
+    "incremental-compiler": "~13.1.19",
     "inquirer": "7.3.3",
     "inquirer-autocomplete-prompt": "1.3.0",
     "is-elevated": "3.0.0",
@@ -167,7 +167,7 @@
     "jasmine-core": "4.0.0",
     "jscodeshift": "0.6.3",
     "json-stringify-safe": "5.0.1",
-    "json10": "~13.1.37",
+    "json10": "~13.1.38",
     "json10-writer": "~13.1.34",
     "json5": "2.1.3",
     "json5-writer": "0.2.0",
@@ -195,7 +195,7 @@
     "ng-packagr": "13.0.0",
     "ng-talkback": "~13.1.19",
     "ng2-file-upload": "1.3.0",
-    "ng2-logger": "~13.1.17",
+    "ng2-logger": "~13.1.18",
     "ng2-rest": "~13.2.1",
     "ng4-icons": "~13.1.21",
     "ng4-modal": "~13.1.23",
@@ -244,9 +244,9 @@
     "sudo-block": "3.0.0",
     "systeminformation": "3.45.7",
     "task.js": "0.1.5",
-    "tnp-cli": "~13.1.52",
-    "tnp-config": "~13.1.68",
-    "tnp-core": "~13.2.10",
+    "tnp-cli": "~13.1.53",
+    "tnp-config": "~13.1.69",
+    "tnp-core": "~13.2.11",
     "tnp-db": "~13.1.16",
     "tnp-helpers": "~13.1.26",
     "tnp-models": "~13.1.18",
