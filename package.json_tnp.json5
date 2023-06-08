@@ -23,7 +23,7 @@
 
   smartContainerTarget: '',
   type: "isomorphic-lib",
-  version: 'v16',
+  version: 'v4',
   additionalNpmNames: ["firedev-walk-object"],
   license: "MIT",
   private: false,
