@@ -68,7 +68,7 @@
   },
   "license": "MIT",
   "private": false,
-  "lastBuildTagHash": "2ed83fc2d2fa4a063d84db97cf99a48f947119ec",
+  "lastBuildTagHash": "d02b5efd210d77f09af93878d201e9388db78ee1",
   "devDependencies": {
     "@angular-devkit/build-angular": "~16.0.5",
     "@angular-devkit/core": "~16.0.5",
@@ -247,7 +247,7 @@
     "localforage": "1.10.0",
     "lockfile": "1.0.4",
     "lodash": "4.17.20",
-    "lodash-walk-object": "~16.5.4",
+    "lodash-walk-object": "~16.5.5",
     "lowdb": "1.0.0",
     "magic-renamer": "~16.5.5",
     "material-design-icons": "3.0.1",
