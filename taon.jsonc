@@ -27,7 +27,7 @@
   "smartContainerTarget": "",
   "type": "isomorphic-lib",
   "version": "v18",
-  "additionalNpmNames": ["firedev-walk-object"],
+  "additionalNpmNames": ["taon-walk-object"],
   "license": "MIT",
   "private": false,
 
