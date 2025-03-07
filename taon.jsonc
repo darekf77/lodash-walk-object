@@ -40,5 +40,6 @@
   "author": "Dariusz Filipiak",
   "homepage": "https://github.com/darekf77/lodash-walk-object#readme",
   "keywords": ["ng2-rest", "docs", "documentation"],
-  "workerPlugins": {}
+  "workerPlugins": {},
+  "packageJsonOverride": {}
 }

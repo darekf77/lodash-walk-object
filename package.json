@@ -43,7 +43,8 @@
       "docs",
       "documentation"
     ],
-    "workerPlugins": {}
+    "workerPlugins": {},
+    "packageJsonOverride": {}
   },
   "name": "lodash-walk-object",
   "description": "Walk all properties deep in object with lodash help",
