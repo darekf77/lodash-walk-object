@@ -1,9 +1,9 @@
 {
+  "resources": [],
   "type": "isomorphic-lib",
   "version": "v18",
   "dependenciesNamesForNpmLib": ["typescript-class-helpers"],
   "additionalNpmNames": ["taon-walk-object"],
-  "resources": [],
 
   "packageJsonOverride": {
     "author": "Dariusz Filipiak",
