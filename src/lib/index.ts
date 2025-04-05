@@ -308,7 +308,7 @@ export class Helpers {
 
   private static _walk(
     json: Object,
-    obj: Object,
+    objOrWhatever: unknown,
     iterator: Iterator,
     lodashPath = '',
     options?: Models.InternalValues,
@@ -321,7 +321,7 @@ export class Helpers {
     // @ts-ignore
     if (!options.breadthWalk) {
       // @ts-ignore
-      options = this.prepareOptions(options, obj, lodashPath);
+      options = this.prepareOptions(options, objOrWhatever, lodashPath);
 
       // @ts-ignore
       if (this._shoudlReturn(options.include, options.exclude, lodashPath)) {
@@ -331,7 +331,7 @@ export class Helpers {
       // @ts-ignore
       if (options.hasIterator && lodashPath !== '') {
         iterator(
-          obj,
+          objOrWhatever,
           lodashPath,
           this._changeValue(json, lodashPath, false, options),
           options,
@@ -340,7 +340,7 @@ export class Helpers {
 
       // @ts-ignore
       if (options._valueChanged) {
-        obj = _.get(json, lodashPath);
+        objOrWhatever = _.get(json, lodashPath);
       }
       options._valueChanged = false;
 
@@ -418,23 +418,27 @@ export class Helpers {
       // @ts-ignore
       const { walkGetters } = options;
 
-      if (Array.isArray(obj)) {
-        obj.forEach((o, i) => {
+      if (Array.isArray(objOrWhatever)) {
+        objOrWhatever.forEach((o, i) => {
           // @ts-ignore
           this._walk(
             json,
-            obj[i],
+            objOrWhatever[i],
             iterator,
             `${lodashPath}[${i}]`,
             options,
             depthLevel + 1,
           );
         });
-      } else if (_.isObject(obj)) {
-        const allKeys = !walkGetters ? [] : Object.getOwnPropertyNames(obj);
-        for (const key in obj) {
+      } else if (_.isObject(objOrWhatever)) {
+        const allKeys = !walkGetters
+          ? []
+          : Object.getOwnPropertyNames(objOrWhatever);
+
+        // @ts-ignore
+        for (const key in objOrWhatever) {
           // console.log('KEY', key)
-          if (_.isObject(obj) && obj.hasOwnProperty(key)) {
+          if (_.isObject(objOrWhatever) && objOrWhatever.hasOwnProperty(key)) {
             _.pull(allKeys, key);
 
             let newPropKey = key;
@@ -445,7 +449,7 @@ export class Helpers {
             // @ts-ignore
             this._walk(
               json,
-              obj[newPropKey],
+              objOrWhatever[newPropKey],
               iterator,
               `${lodashPath === '' ? '' : `${lodashPath}.`}${newPropKey}`,
               options,
@@ -455,7 +459,7 @@ export class Helpers {
         }
         if (walkGetters) {
           for (let index = 0; index < allKeys.length; index++) {
-            if (_.isObject(obj)) {
+            if (_.isObject(objOrWhatever)) {
               const key = allKeys[index];
 
               // @ts-ignore
@@ -463,7 +467,7 @@ export class Helpers {
               // @ts-ignore
               this._walk(
                 json,
-                obj[key],
+                objOrWhatever[key],
                 iterator,
                 `${lodashPath === '' ? '' : `${lodashPath}.`}${key}`,
                 options,
@@ -475,7 +479,7 @@ export class Helpers {
       }
 
       // @ts-ignore
-      if (options._exit && json === obj) {
+      if (options._exit && json === objOrWhatever) {
         // @ts-ignore
         options._exit = false;
       }
