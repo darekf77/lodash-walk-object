@@ -1,44 +1,36 @@
 {
-  "resources": [],
-
-  "overrided": {
-    "includeAsDev": [],
-    "includeOnly": ["typescript-class-helpers"],
-    "ignoreDepsPattern": [],
-    "dependencies": {},
-    "linkedFolders": [],
-    "npmFixes": []
-  },
-
-  "smartContainerBuildTarget": "",
-  "linkedRepos": [],
-
-  "libReleaseOptions": {
-    "nodts": false,
-    "obscure": false,
-    "ugly": false,
-    "includeNodeModules": false,
-    "cliBuildNoDts": false,
-    "cliBuildObscure": false,
-    "cliBuildIncludeNodeModules": false,
-    "cliBuildUglify": false
-  },
-
-  "smartContainerTarget": "",
   "type": "isomorphic-lib",
   "version": "v18",
+  "dependenciesNamesForNpmLib": ["typescript-class-helpers"],
   "additionalNpmNames": ["taon-walk-object"],
-  "license": "MIT",
-  "private": false,
 
-  "scripts": {
-    "test": "mocha --require ts-node/register src/**/*.spec.ts",
-    "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch"
-  },
+  "autoReleaseConfigAllowedItems": [{
+    "artifactName": "npm-lib-and-cli-tool"
+  }],
 
-  "description": "Walk all properties deep in object with lodash help",
-  "author": "Dariusz Filipiak",
-  "homepage": "https://github.com/darekf77/lodash-walk-object#readme",
-  "keywords": ["ng2-rest", "docs", "documentation"],
-  "workerPlugins": {}
+  "resources": [],
+
+  "packageJsonOverride": {
+    "author": "Dariusz Filipiak",
+
+    "bugs": {
+      "url": "https://github.com/darekf77/lodash-walk-object/issues"
+    },
+
+    "description": "Walk all properties deep in object with lodash help",
+    "homepage": "https://github.com/darekf77/lodash-walk-object#readme",
+    "keywords": ["ng2-rest", "docs", "documentation"],
+    "license": "MIT",
+    "private": false,
+
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/darekf77/lodash-walk-object.git"
+    },
+
+    "scripts": {
+      "test": "mocha --require ts-node/register src/**/*.spec.ts",
+      "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch"
+    }
+  }
 }
