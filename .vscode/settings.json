@@ -149,15 +149,18 @@
   "search.include": [
     "**/src/**"
   ],
-  "json.schemas": [{
-    "fileMatch": [
-      "/taon.jsonc"
-    ],
-    "url": "./taon-config-standalone.schema.json"
-  }, {
-    "fileMatch": [
-      "/taon.jsonc"
-    ],
-    "url": "./taon-config-standalone.schema.json"
-  }]
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "/taon.jsonc"
+      ],
+      "url": "./taon-config-standalone.schema.json"
+    },
+    {
+      "fileMatch": [
+        "/taon.jsonc"
+      ],
+      "url": "./taon-config-standalone.schema.json"
+    }
+  ]
 }
