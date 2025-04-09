@@ -4,18 +4,13 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strictNullChecks": false,
-    "rootDir": "./src",
-    "paths": {
-      "lodash-walk-object": [
-        "./src/lib"
-      ],
-      "lodash-walk-object/*": [
-        "./src/lib/*"
-      ]
-    }
+    "rootDir": "./",
+    "esModuleInterop": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "environments/**/*.ts",
+    "env.ts"
   ],
   "exclude": [
     "src/assets"

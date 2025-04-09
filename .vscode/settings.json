@@ -144,7 +144,7 @@
   "tslint.alwaysShowRuleFailuresAsWarnings": false,
   "prettier.endOfLine": "auto",
   "prettier.prettierPath": "./node_modules/prettier",
-  "window.title": "npm/taon-dev/lodash-walk-object (taon-walk-object) [ ${activeEditorShort} ]",
+  "window.title": "npm/taon-dev/lodash-walk-object  [ ${activeEditorShort} ]",
   "search.useIgnoreFiles": false,
   "search.include": [
     "**/src/**"
@@ -152,9 +152,9 @@
   "json.schemas": [
     {
       "fileMatch": [
-        "/taon.jsonc"
+        "/docs-config.jsonc"
       ],
-      "url": "./taon-config-standalone.schema.json"
+      "url": "./docs-config.schema.json"
     },
     {
       "fileMatch": [
