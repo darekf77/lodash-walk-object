@@ -1,16 +1,19 @@
 {
   "extends": "./tsconfig.isomorphic.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
     "strictNullChecks": false,
-    "rootDir": "./",
-    "esModuleInterop": true
+    "rootDir": "./src",
+    "paths": {
+      "lodash-walk-object": [
+        "./src/lib"
+      ],
+      "lodash-walk-object/*": [
+        "./src/lib/*"
+      ]
+    }
   },
   "include": [
-    "src/**/*",
-    "environments/**/*.ts",
-    "env.ts"
+    "src/**/*"
   ],
   "exclude": [
     "src/assets"
