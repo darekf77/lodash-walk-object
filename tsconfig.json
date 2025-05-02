@@ -4,10 +4,16 @@
     "strictNullChecks": false,
     "rootDir": "./src",
     "paths": {
-      "lodash-walk-object": [
+      "@lib": [
         "./src/lib"
       ],
-      "lodash-walk-object/*": [
+      "@lib/*": [
+        "./src/lib/*"
+      ],
+      "lodash-walk-object/src": [
+        "./src/lib"
+      ],
+      "lodash-walk-object/src/*": [
         "./src/lib/*"
       ]
     }
