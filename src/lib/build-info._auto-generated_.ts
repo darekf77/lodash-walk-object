@@ -1,6 +1,6 @@
 // THIS FILE IS GENERATED - DO NOT MODIFY
 export const BUILD_FRAMEWORK_CLI_NAME = 'tnp';
 export const PROJECT_NPM_NAME = 'lodash-walk-object';
-export const CURRENT_PACKAGE_VERSION = '19.0.22';
+export const CURRENT_PACKAGE_VERSION = '19.0.24';
 // THIS FILE IS GENERATED - DO NOT MODIFY
       
