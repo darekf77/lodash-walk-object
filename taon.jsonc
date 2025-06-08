@@ -3,6 +3,7 @@
   "version": "v19",
   "dependenciesNamesForNpmLib": ["typescript-class-helpers"],
   "additionalNpmNames": ["taon-walk-object"],
+  "appId": "com.domain.example.lodash-walk-object",
 
   "autoReleaseConfigAllowedItems": [{
     "artifactName": "npm-lib-and-cli-tool"
