@@ -5,12 +5,12 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-lodash-walk-object',
-  template: 'hello from lodash-walk-object'
+  template: 'hello from lodash-walk-object',
 })
 export class LodashWalkObjectComponent implements OnInit {
-  constructor() { }
+  constructor() {}
 
-  ngOnInit() { }
+  ngOnInit() {}
 }
 
 @NgModule({
@@ -19,13 +19,11 @@ export class LodashWalkObjectComponent implements OnInit {
   declarations: [LodashWalkObjectComponent],
   providers: [],
 })
-export class LodashWalkObjectModule { }
+export class LodashWalkObjectModule {}
 //#endregion
 
 //#region @backend
-async function start(port: number)  {
-
-}
+async function start(port: number) {}
 
 export default start;
 
