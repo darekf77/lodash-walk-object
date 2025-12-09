@@ -6,7 +6,8 @@
   "appId": "com.domain.example.lodash-walk-object",
 
   "autoReleaseConfigAllowedItems": [{
-    "artifactName": "npm-lib-and-cli-tool"
+    "artifactName": "npm-lib-and-cli-tool",
+    "taskName": "npm"
   }],
 
   "resources": [],
