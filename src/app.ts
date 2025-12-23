@@ -1,3 +1,4 @@
+// @ts-nocheck
 //#region @notForNpm
 //#region @browser
 import { NgModule } from '@angular/core';
