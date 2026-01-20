@@ -1,33 +1,33 @@
-// @ts-nocheck
-//#region @notForNpm
-//#region @browser
-import { NgModule } from '@angular/core';
-import { Component, OnInit } from '@angular/core';
+// // @ts-nocheck
+// //#region @notForNpm
+// //#region @browser
+// import { NgModule } from '@angular/core';
+// import { Component, OnInit } from '@angular/core';
 
-@Component({
-  selector: 'app-lodash-walk-object',
-  template: 'hello from lodash-walk-object',
-})
-export class LodashWalkObjectComponent implements OnInit {
-  constructor() {}
+// @Component({
+//   selector: 'app-lodash-walk-object',
+//   template: 'hello from lodash-walk-object',
+// })
+// export class LodashWalkObjectComponent implements OnInit {
+//   constructor() {}
 
-  ngOnInit() {}
-}
+//   ngOnInit() {}
+// }
 
-@NgModule({
-  imports: [],
-  exports: [LodashWalkObjectComponent],
-  declarations: [LodashWalkObjectComponent],
-  providers: [],
-})
-export class LodashWalkObjectModule {}
-//#endregion
+// @NgModule({
+//   imports: [],
+//   exports: [LodashWalkObjectComponent],
+//   declarations: [LodashWalkObjectComponent],
+//   providers: [],
+// })
+// export class LodashWalkObjectModule {}
+// //#endregion
 
-//#region @backend
-async function start(port: number) {}
+// //#region @backend
+// async function start(port: number) {}
 
-export default start;
+// export default start;
 
-//#endregion
+// //#endregion
 
-//#endregion
+// //#endregion

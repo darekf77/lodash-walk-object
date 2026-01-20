@@ -1,16 +1,20 @@
 {
   "typescript.check.workspaceVersion": false,
+
   "workbench.colorCustomizations": {
     "activityBar.background": "#2f751acb",
     "statusBar.background": "#4ac62f",
     "statusBar.debuggingBackground": "#15d8ff"
   },
+
   "editor.rulers": [
     80,
     120
   ],
+
   "html.format.wrapAttributes": "force-aligned",
   "workbench.colorTheme": "Default Light+",
+
   "files.exclude": {
     "_changelog": true,
     ".sass-cache": true,
@@ -27,7 +31,9 @@
     "Thumbs.db": true,
     "browser": true,
     "websql": true,
+    "dist-prod": true,
     "dist-nocutsrc": true,
+    "dist-nocutsrc-prod": true,
     "package-lock.json": true,
     "chrome-profiler-events*.json": true,
     "speed-measure-plugin*.json": true,
@@ -63,6 +69,7 @@
     "tslint.*": true,
     "*.schema.json": true
   },
+
   "search.exclude": {
     "bin": true,
     "local_release": true,
@@ -96,38 +103,47 @@
     "*.rest": true,
     "**/*.rest": true
   },
+
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
+
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
+
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
+
   "[json5]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
+
   "[scss]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
+
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
+
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
+
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
+
   "eslint.migration.2_x": "off",
   "eslint.enable": true,
   "prettier.enable": true,
@@ -140,9 +156,11 @@
   "prettier.prettierPath": "./node_modules/prettier",
   "window.title": "npm/taon-dev/lodash-walk-object  [ ${activeEditorShort} ]",
   "search.useIgnoreFiles": false,
+
   "search.include": [
     "**/src/**"
   ],
+
   "json.schemas": [
     {
       "fileMatch": [
@@ -157,15 +175,25 @@
       "url": "./taon-config-standalone.schema.json"
     }
   ],
+
   "files.watcherExclude": {
     "local_release/**": true
   },
+
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
   },
+
   "[dockercompose]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": false
+  },
+
+  "typescript.suggest.autoImports": false,
+  "javascript.suggest.autoImports": false,
+
+  "files.associations": {
+    "tsconfig.json": "json"
   }
 }
