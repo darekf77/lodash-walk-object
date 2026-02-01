@@ -1,6 +1,6 @@
 {
   "name": "lodash-walk-object",
-  "version": "21.0.26",
+  "version": "21.0.27",
   "scripts": {
     "test": "mocha --require ts-node/register src/**/*.spec.ts",
     "test:watch": "mocha --compilers ts-node/register src/**/*.spec.ts --watch",
