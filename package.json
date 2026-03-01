@@ -459,5 +459,9 @@
     "type": "git",
     "url": "git+https://github.com/darekf77/lodash-walk-object.git"
   },
-  "bin": {}
+  "bin": {
+    "lodash-walk-object": "bin/lodash-walk-object",
+    "lodash-walk-object-debug": "bin/lodash-walk-object-debug",
+    "lodash-walk-object-debug-brk": "bin/lodash-walk-object-debug-brk"
+  }
 }
