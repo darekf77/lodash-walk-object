@@ -1,208 +1,584 @@
 import { _ } from 'tnp-core/src';
-import { CLASS } from 'typescript-class-helpers/src';
 
-export interface Circ {
-  /**
-   * This path value will be overriten with circural object value
-   */
-  pathToObj: string;
-  /**
-   * lodash path to circural objects
-   * OR
-   * actual object for circural mapping
-   */
-  circuralTargetPath: string | any;
-}
+import { Circ, Models, Iterator, UnknownRecord, PropertyEntry, PreparedPath } from './models';
 
-// let counter = 0
-export namespace Models {
-  export interface InDBType {
-    target: any;
-    path: string;
-  }
-
-  export interface Ver {
-    v: any;
-    p: string;
-    parent: Ver;
-    isGetter?: boolean;
-  }
-
-  export interface StartIteratorOptions {
-    walkGetters?: boolean;
-
-    /**
-     * Default in breadhTwalk
-     */
-    checkCircural?: boolean;
-    breadthWalk?: boolean;
-    include?: string[];
-    exclude?: string[];
-  }
-
-  export interface AdditionalIteratorOptions extends StartIteratorOptions {
-    skipObject?: () => void;
-    isGetter?: boolean;
-    /**
-     * Breadth walk will skip content of circural objects
-     */
-    isCircural?: boolean;
-    exit?: () => void;
-  }
-
-  export interface InternalValues extends AdditionalIteratorOptions {
-    stack?: any[];
-    circural?: Circ[];
-    hasIterator?: boolean;
-    _valueChanged: boolean;
-    _skip: boolean;
-    _exit: boolean;
-  }
-}
-
-function findChildren(
-  ver: Models.Ver,
-  lp: string,
-  walkGetters: boolean,
-): Models.Ver[] {
-  const obj = ver.v;
-  if (_.isArray(obj)) {
-    return obj.map((v, i) => {
-      return { v, p: `${lp}[${i}]`, parent: ver, isGetter: false };
-    });
-  } else if (_.isObject(obj)) {
-    const allKeys = !walkGetters ? [] : Object.getOwnPropertyNames(obj);
-    const children: Models.Ver[] = [];
-    for (const key in obj) {
-      if (
-        _.isObject(obj) &&
-        _.isFunction(obj.hasOwnProperty) &&
-        obj.hasOwnProperty(key)
-      ) {
-        _.pull(allKeys, key);
-        children.push({
-          v: obj[key],
-          p: `${lp === '' ? '' : `${lp}.`}${key}`,
-          parent: ver,
-          isGetter: false,
-        });
-      }
-    }
-    if (walkGetters) {
-      for (let index = 0; index < allKeys.length; index++) {
-        if (_.isObject(obj)) {
-          const key = allKeys[index];
-          children.push({
-            v: obj[key],
-            p: `${lp === '' ? '' : `${lp}.`}${key}`,
-            parent: ver,
-            isGetter: true,
-          });
-        }
-      }
-    }
-    return children;
-  }
-  return [];
-}
-
-export type Iterator = (
-  value: any,
-  lodashPath: string,
-  // @ts-ignore
-  changeValueTo: (newValue) => void,
-  options?: Models.AdditionalIteratorOptions,
-) => void;
 export class Helpers {
   public static get Walk() {
     const self = this;
+
     return {
       Object(
-        json: Object,
+        json: object,
         iterator: Iterator,
-        optionsOrWalkGettersValue?: Models.StartIteratorOptions,
-      ) {
-        if (_.isUndefined(optionsOrWalkGettersValue)) {
-          optionsOrWalkGettersValue = {};
-        }
-
-        (optionsOrWalkGettersValue as Models.InternalValues).hasIterator =
-          _.isFunction(iterator);
-
-        if (_.isUndefined(optionsOrWalkGettersValue.breadthWalk)) {
-          optionsOrWalkGettersValue.breadthWalk = false;
-        }
-
-        let { circural } = self._walk(
-          json,
-          json,
-          iterator,
-          void 0,
-          optionsOrWalkGettersValue as any,
+        options: Models.StartIteratorOptions = {},
+      ): {
+        circs: Circ[] | undefined;
+      } {
+        const internalOptions = self.createInternalOptions(
+          options,
+          _.isFunction(iterator),
         );
 
-        return { circs: circural };
+        const result = self._walk(json, json, iterator, '', internalOptions);
+
+        return {
+          circs: result.circural,
+        };
       },
+
       ObjectBy(
         property: string,
-        inContext: Object,
+        inContext: object,
         iterator: Iterator,
-        options?: Models.StartIteratorOptions,
-      ) {
+        options: Models.StartIteratorOptions = {},
+      ): {
+        circs: Circ[] | undefined;
+      } {
+        const contextRecord = inContext as UnknownRecord;
+
         if (_.isFunction(iterator)) {
-          iterator(inContext, '', self._changeValue(inContext, property, true)); // TODO Add optoins
+          iterator(inContext, '', self._changeValue(inContext, property, true));
         }
-        // @ts-ignore
-        const json = inContext[property];
+
+        const json = contextRecord[property];
+
+        if (!self.isObjectLike(json)) {
+          return {
+            circs: undefined,
+          };
+        }
+
         return self.Walk.Object(json, iterator, options);
       },
     };
   }
 
+  private static createInternalOptions(
+    options: Models.StartIteratorOptions,
+    hasIterator: boolean,
+  ): Models.InternalValues {
+    const internalOptions: Models.InternalValues = {
+      ...options,
+
+      walkGetters: options.walkGetters ?? true,
+      checkCircural: options.checkCircural ?? false,
+      breadthWalk: options.breadthWalk ?? false,
+
+      include: options.include ?? [],
+      exclude: options.exclude ?? [],
+
+      isGetter: false,
+      isCircural: false,
+
+      hasIterator,
+
+      _valueChanged: false,
+      _skip: false,
+      _exit: false,
+    };
+
+    internalOptions.skipObject = () => {
+      internalOptions._skip = true;
+    };
+
+    internalOptions.exit = () => {
+      internalOptions._exit = true;
+    };
+
+    if (internalOptions.checkCircural) {
+      internalOptions.stack = [];
+      internalOptions.circural = [];
+    }
+
+    return internalOptions;
+  }
+
+  private static _walk(
+    json: object,
+    currentValue: unknown,
+    iterator: Iterator,
+    lodashPath: string,
+    options: Models.InternalValues,
+  ): Models.InternalValues {
+    if (options.breadthWalk) {
+      return this.walkBreadthFirst(json, iterator, lodashPath, options);
+    }
+
+    this.walkDepthFirst(
+      json,
+      currentValue,
+      iterator,
+      lodashPath,
+      options,
+      false,
+    );
+
+    return options;
+  }
+
+  private static walkDepthFirst(
+    json: object,
+    currentValue: unknown,
+    iterator: Iterator,
+    lodashPath: string,
+    options: Models.InternalValues,
+    isGetter: boolean,
+  ): void {
+    if (options._exit) {
+      return;
+    }
+
+    if (this.shouldSkipPath(options.include, options.exclude, lodashPath)) {
+      return;
+    }
+
+    this.prepareCurrentValue(currentValue, lodashPath, options, isGetter);
+
+    if (options._exit) {
+      return;
+    }
+
+    if (options.hasIterator && lodashPath !== '') {
+      iterator(
+        currentValue,
+        lodashPath,
+        this._changeValue(json, lodashPath, false, options),
+        options,
+      );
+    }
+
+    if (options._exit) {
+      return;
+    }
+
+    if (options._valueChanged) {
+      currentValue = _.get(json, lodashPath);
+      options._valueChanged = false;
+    }
+
+    if (options.isCircural) {
+      options._skip = true;
+    }
+
+    if (options._skip) {
+      options._skip = false;
+      return;
+    }
+
+    const children = this.findChildren(
+      currentValue,
+      lodashPath,
+      options.walkGetters ?? true,
+    );
+
+    for (const child of children) {
+      if (options._exit) {
+        return;
+      }
+
+      this.walkDepthFirst(
+        json,
+        child.value,
+        iterator,
+        child.path,
+        options,
+        child.isGetter,
+      );
+    }
+  }
+
+  private static walkBreadthFirst(
+    json: object,
+    iterator: Iterator,
+    lodashPath: string,
+    options: Models.InternalValues,
+  ): Models.InternalValues {
+    const queue: Models.Ver[] = [
+      {
+        v: json,
+        p: lodashPath,
+        isGetter: false,
+      },
+    ];
+
+    while (queue.length > 0) {
+      if (options._exit) {
+        break;
+      }
+
+      const current = queue.shift();
+
+      if (!current) {
+        break;
+      }
+
+      if (this.shouldSkipPath(options.include, options.exclude, current.p)) {
+        continue;
+      }
+
+      this.prepareCurrentValue(
+        current.v,
+        current.p,
+        options,
+        current.isGetter ?? false,
+      );
+
+      if (options._exit) {
+        break;
+      }
+
+      if (options.hasIterator && current.p !== '') {
+        iterator(
+          current.v,
+          current.p,
+          this._changeValue(json, current.p, false, options),
+          options,
+        );
+      }
+
+      if (options._exit) {
+        break;
+      }
+
+      if (options._valueChanged) {
+        current.v = _.get(json, current.p);
+        options._valueChanged = false;
+      }
+
+      if (options.isCircural) {
+        continue;
+      }
+
+      if (options._skip) {
+        options._skip = false;
+        continue;
+      }
+
+      const children = this.findChildren(
+        current.v,
+        current.p,
+        options.walkGetters ?? true,
+      );
+
+      for (const child of children) {
+        queue.push({
+          v: child.value,
+          p: child.path,
+          parent: current,
+          isGetter: child.isGetter,
+        });
+      }
+    }
+
+    return options;
+  }
+
+  private static prepareCurrentValue(
+    value: unknown,
+    lodashPath: string,
+    options: Models.InternalValues,
+    isGetter: boolean,
+  ): void {
+    options.isGetter = isGetter;
+    options.isCircural = false;
+
+    if (!options.checkCircural || !this.isObjectLike(value)) {
+      return;
+    }
+
+    const stack = options.stack ?? [];
+    const circular = options.circural ?? [];
+
+    options.stack = stack;
+    options.circural = circular;
+
+    const existing = stack.find(entry => entry.target === value);
+
+    if (existing) {
+      circular.push({
+        pathToObj: lodashPath,
+        circuralTargetPath: existing.path,
+      });
+
+      options.isCircural = true;
+      return;
+    }
+
+    stack.push({
+      target: value,
+      path: lodashPath,
+    });
+  }
+
+  private static findChildren(
+    value: unknown,
+    parentPath: string,
+    walkGetters: boolean,
+  ): Array<{
+    value: unknown;
+    path: string;
+    isGetter: boolean;
+  }> {
+    if (Array.isArray(value)) {
+      return value.map((child, index) => ({
+        value: child,
+        path: `${parentPath}[${index}]`,
+        isGetter: false,
+      }));
+    }
+
+    if (!this.isObjectLike(value)) {
+      return [];
+    }
+
+    const entries = this.getPropertyEntries(value, walkGetters);
+
+    return entries.map(entry => ({
+      value: entry.value,
+      path: this.appendPath(parentPath, entry.key),
+      isGetter: entry.isGetter,
+    }));
+  }
+
+  private static getPropertyEntries(
+    object: object,
+    walkGetters: boolean,
+  ): PropertyEntry[] {
+    const result: PropertyEntry[] = [];
+    const handledKeys = new Set<string>();
+
+    for (const key of Object.keys(object)) {
+      const readResult = this.readProperty(object, key);
+
+      if (!readResult.success) {
+        continue;
+      }
+
+      handledKeys.add(key);
+
+      result.push({
+        key,
+        value: readResult.value,
+        isGetter: false,
+      });
+    }
+
+    if (!walkGetters) {
+      return result;
+    }
+
+    for (const key of Object.getOwnPropertyNames(object)) {
+      if (handledKeys.has(key)) {
+        continue;
+      }
+
+      const readResult = this.readProperty(object, key);
+
+      if (!readResult.success) {
+        continue;
+      }
+
+      handledKeys.add(key);
+
+      result.push({
+        key,
+        value: readResult.value,
+        isGetter: true,
+      });
+    }
+
+    let prototype = Object.getPrototypeOf(object) as object | null;
+
+    while (prototype && prototype !== Object.prototype) {
+      const descriptors = Object.getOwnPropertyDescriptors(prototype);
+
+      for (const [key, descriptor] of Object.entries(descriptors)) {
+        if (
+          key === 'constructor' ||
+          handledKeys.has(key) ||
+          typeof descriptor.get !== 'function'
+        ) {
+          continue;
+        }
+
+        const readResult = this.readProperty(object, key);
+
+        if (!readResult.success) {
+          continue;
+        }
+
+        handledKeys.add(key);
+
+        result.push({
+          key,
+          value: readResult.value,
+          isGetter: true,
+        });
+      }
+
+      prototype = Object.getPrototypeOf(prototype) as object | null;
+    }
+
+    return result;
+  }
+
+  private static readProperty(
+    object: object,
+    key: string,
+  ):
+    | {
+        success: true;
+        value: unknown;
+      }
+    | {
+        success: false;
+      } {
+    try {
+      return {
+        success: true,
+        value: Reflect.get(object, key),
+      };
+    } catch {
+      return {
+        success: false,
+      };
+    }
+  }
+
+  private static appendPath(parentPath: string, property: string): string {
+    const propertyPath = this.propertyToPath(property);
+
+    if (parentPath === '') {
+      return propertyPath;
+    }
+
+    if (propertyPath.startsWith('[')) {
+      return `${parentPath}${propertyPath}`;
+    }
+
+    return `${parentPath}.${propertyPath}`;
+  }
+
+  private static propertyToPath(property: string): string {
+    /**
+     * Preserve the old path format for keys that lodash can safely
+     * interpret in dot notation.
+     *
+     * Only keys containing dots or brackets need quoted bracket syntax,
+     * because those characters change the lodash path meaning.
+     */
+    if (
+      property !== '' &&
+      !property.includes('.') &&
+      !property.includes('[') &&
+      !property.includes(']')
+    ) {
+      return property;
+    }
+
+    return `[${JSON.stringify(property)}]`;
+  }
+
+  private static shouldSkipPath(
+    include: string[] = [],
+    exclude: string[] = [],
+    lodashPath: string,
+  ): boolean {
+    const normalizedPath = this.normalizeRootArrayPath(lodashPath);
+
+    if (normalizedPath === '') {
+      return false;
+    }
+
+    const excluded = exclude.some(excludedPath =>
+      this.isSamePathOrDescendant(normalizedPath, excludedPath),
+    );
+
+    if (excluded) {
+      return true;
+    }
+
+    if (include.length === 0) {
+      return false;
+    }
+
+    const includedOrRequiredParent = include.some(includedPath => {
+      return (
+        this.isSamePathOrDescendant(normalizedPath, includedPath) ||
+        this.isAncestorPath(normalizedPath, includedPath)
+      );
+    });
+
+    return !includedOrRequiredParent;
+  }
+
+  private static normalizeRootArrayPath(path: string): string {
+    return path.replace(/^\[(?:'|")?\d+(?:'|")?\]\.?/, '').trim();
+  }
+
+  private static isSamePathOrDescendant(
+    path: string,
+    parentPath: string,
+  ): boolean {
+    return (
+      path === parentPath ||
+      path.startsWith(`${parentPath}.`) ||
+      path.startsWith(`${parentPath}[`)
+    );
+  }
+
+  private static isAncestorPath(
+    possibleAncestor: string,
+    path: string,
+  ): boolean {
+    return (
+      path.startsWith(`${possibleAncestor}.`) ||
+      path.startsWith(`${possibleAncestor}[`)
+    );
+  }
+
   private static _changeValue(
-    json: Object,
-    lodahPath: string,
+    json: object,
+    lodashPath: string,
     simpleChange = false,
     options?: Models.InternalValues,
-  ) {
-    var { contextPath, property } = this._prepareParams(lodahPath);
-    var context = _.get(json, contextPath);
+  ): (newValue: unknown) => void {
+    const { contextPath, property } = this._prepareParams(lodashPath);
 
-    return (newValue: any) => {
+    return (newValue: unknown): void => {
       if (contextPath === '') {
         simpleChange = true;
       }
 
       if (simpleChange) {
-        // @ts-ignore
-        json[property] = newValue;
+        Reflect.set(json, property, newValue);
       } else {
-        // console.log(`CONTEXT VALUE CHANGE!  "${contextPath}" + "${property}" `, newValue)
-        // console.log('context', context)
-        if (context) {
-          context[property] = newValue;
+        const context = _.get(json, contextPath);
+
+        if (this.isObjectLike(context)) {
+          Reflect.set(context, property, newValue);
         }
       }
+
       if (options) {
         options._valueChanged = true;
       }
     };
   }
 
-  private static _prepareParams(lodashPath: string) {
-    // console.log('contextPath before', lodashPath)
+  private static _prepareParams(lodashPath: string): PreparedPath {
     const contextPath = this._Helpers.Path.getContextPath(lodashPath);
-    // console.log('contextPath after', contextPath)
 
-    let property = this._Helpers.Path.getPropertyPath(lodashPath, contextPath);
-    // console.log('property after process', property)
-    if (
-      _.isString(property) &&
-      property.trim() !== '' &&
-      !_.isNaN(Number(property))
-    ) {
-      property = Number(property);
-    }
+    const rawProperty = this._Helpers.Path.getPropertyPath(
+      lodashPath,
+      contextPath,
+    );
+
+    const property =
+      rawProperty.trim() !== '' && !Number.isNaN(Number(rawProperty))
+        ? Number(rawProperty)
+        : rawProperty;
+
     return {
       contextPath,
       property,
@@ -213,307 +589,36 @@ export class Helpers {
     return {
       get Path() {
         return {
-          // @ts-ignore
-          getPropertyPath(lodahPath, contetPath) {
-            return lodahPath
-              .replace(contetPath, '')
+          getPropertyPath(lodashPath: string, contextPath: string): string {
+            return lodashPath
+              .replace(contextPath, '')
               .replace(/^\./, '')
-              .replace(/\[/, '')
-              .replace(/\]/, '');
+              .replace(/^\[/, '')
+              .replace(/\]$/, '')
+              .replace(/^["']|["']$/g, '');
           },
-          getContextPath(p: string) {
-            let res: string;
-            if (p.endsWith(']')) {
-              res = p.replace(/\[(\"|\')?[0-9]+(\"|\')?\]$/, '');
+
+          getContextPath(path: string): string {
+            let result: string;
+
+            if (path.endsWith(']')) {
+              result = path.replace(/\[(?:"|')?.+?(?:"|')?\]$/, '');
             } else {
-              res = p.replace(/\.([a-zA-Z0-9]|\$|\_|\@|\-|\/|\:)+$/, '');
+              result = path.replace(/\.([a-zA-Z0-9_$@\-/:]+)$/, '');
             }
-            return res === p ? '' : res;
+
+            return result === path ? '' : result;
           },
         };
       },
     };
   }
 
-  private static _shoudlReturn(include = [], exclude = [], lodashPath: string) {
-    let res = false;
-    if (lodashPath.replace(/^\[(\'|\")?[0-9]*(\'|\")?\]/, '').trim() !== '') {
-      lodashPath = lodashPath.replace(/^\[(\'|\")?[0-9]*(\'|\")?\]\./, '');
-      res =
-        (_.isArray(include) &&
-          include.length > 0 &&
-          !include.find(p => lodashPath.startsWith(p))) ||
-        (_.isArray(exclude) &&
-          exclude.length > 0 &&
-          !!exclude.find(p => lodashPath.startsWith(p)));
-    }
-
-    return res;
-  }
-
-  // @ts-ignore
-  private static prepareOptions(
-    options: Models.InternalValues,
-    obj,
-    lodashPath,
-  ) {
-    if (options._exit) {
-      return;
-    }
-
-    if (_.isUndefined(options.walkGetters)) {
-      options.walkGetters = true;
-    }
-
-    if (_.isUndefined(options.checkCircural)) {
-      options.checkCircural = false;
-    }
-
-    if (_.isUndefined(options.isGetter)) {
-      // @ts-ignore
-      options.isGetter = false;
-    }
-
-    if (_.isUndefined(options._valueChanged)) {
-      options._valueChanged = false;
-    }
-
-    if (_.isUndefined(options._exit)) {
-      // @ts-ignore
-      options._exit = false;
-    }
-
-    if (_.isUndefined(options.exit)) {
-      options.exit = () => {
-        options._exit = true;
-      };
-    }
-
-    if (_.isUndefined(options._skip)) {
-      // @ts-ignore
-      options._skip = false;
-    }
-
-    if (_.isUndefined(options.skipObject)) {
-      options.skipObject = () => {
-        options._skip = true;
-      };
-    }
-
-    if (options.checkCircural) {
-      if (_.isUndefined(options.stack)) {
-        options.stack = [];
-      }
-
-      if (_.isUndefined(options.circural)) {
-        options.circural = [];
-      }
-    }
-
-    const { stack } = options;
-    options.isCircural = false;
-
-    if (options.checkCircural && _.isObject(obj)) {
-      const inStack = stack.find((c: Models.InDBType) => c.target == obj);
-
-      if (!_.isUndefined(inStack)) {
-        const circ: Circ = {
-          pathToObj: lodashPath,
-          circuralTargetPath: inStack.path,
-        };
-
-        options.circural.push(circ);
-        options.isCircural = true;
-      } else {
-        stack.push({
-          path: lodashPath,
-          target: obj,
-        } as Models.InDBType);
-      }
-    }
-    return options;
-  }
-
-  private static _walk(
-    json: Object,
-    objOrWhatever: unknown,
-    iterator: Iterator,
-    lodashPath = '',
-    options?: Models.InternalValues,
-    depthLevel = 0,
-  ) {
-    if (!options) {
-      options = {} as any;
-    }
-
-    // @ts-ignore
-    if (!options.breadthWalk) {
-      // @ts-ignore
-      options = this.prepareOptions(options, objOrWhatever, lodashPath);
-
-      // @ts-ignore
-      if (this._shoudlReturn(options.include, options.exclude, lodashPath)) {
-        return;
-      }
-
-      // @ts-ignore
-      if (options.hasIterator && lodashPath !== '') {
-        iterator(
-          objOrWhatever,
-          lodashPath,
-          this._changeValue(json, lodashPath, false, options),
-          options,
-        );
-      }
-
-      // @ts-ignore
-      if (options._valueChanged) {
-        objOrWhatever = _.get(json, lodashPath);
-      }
-      options._valueChanged = false;
-
-      if (options.isCircural) {
-        options._skip = true;
-      }
-
-      if (options._skip) {
-        // @ts-ignore
-        options._skip = false;
-        return;
-      }
-    }
-
-    if (options.breadthWalk) {
-      let queue: Models.Ver[] = [{ v: json, p: lodashPath, parent: void 0 }];
-
-      // const pathesToSkip = {};
-      while (queue.length > 0) {
-        const ver = queue.shift();
-        // console.log(`pathes to skip`, pathesToSkip);
-        // if (!_.isUndefined(Object.keys(pathesToSkip).find(key => ver.p.startsWith(pathesToSkip[key])))) {
-        // console.log(`skip: ${ver.p}`)
-        // continue;
-        // }
-        // @ts-ignore
-        if (this._shoudlReturn(options.include, options.exclude, ver.p)) {
-          // pathesToSkip[ver.p] = true;
-          // console.log(`skip2: ${ver.p}`)
-          continue;
-        }
-
-        // console.log(`not skip value ${ver.p}`)
-
-        // @ts-ignore
-        let { v, p } = ver;
-        // @ts-ignore
-        options = this.prepareOptions(options, v, p);
-
-        if (options._exit) {
-          console.log('EXIT');
-          return options;
-        }
-        if (options.hasIterator && p !== '') {
-          iterator(v, p, this._changeValue(json, p, false, options), options);
-        }
-
-        // @ts-ignore
-        if (options._valueChanged) {
-          ver.v = _.get(json, p);
-        }
-        options._valueChanged = false;
-
-        if (options.isCircural) {
-          // pathesToSkip[ver.p] = true;
-          continue;
-        }
-
-        if (options._skip) {
-          // @ts-ignore
-          options._skip = false;
-          // pathesToSkip[ver.p] = true;
-          continue;
-        }
-        // console.log(`LOOK FOR CHILDREN OF ${ver.p}`)
-        if (_.isArray(v)) {
-          // @ts-ignore
-          queue = queue.concat(findChildren(ver, p, options.walkGetters));
-        } else if (_.isObject(v)) {
-          // @ts-ignore
-          queue = queue.concat(findChildren(ver, p, options.walkGetters));
-        }
-      }
-    } else {
-      // @ts-ignore
-      const { walkGetters } = options;
-
-      if (Array.isArray(objOrWhatever)) {
-        objOrWhatever.forEach((o, i) => {
-          // @ts-ignore
-          this._walk(
-            json,
-            objOrWhatever[i],
-            iterator,
-            `${lodashPath}[${i}]`,
-            options,
-            depthLevel + 1,
-          );
-        });
-      } else if (_.isObject(objOrWhatever)) {
-        const allKeys = !walkGetters
-          ? []
-          : Object.getOwnPropertyNames(objOrWhatever);
-
-        // @ts-ignore
-        for (const key in objOrWhatever) {
-          // console.log('KEY', key)
-          if (_.isObject(objOrWhatever) && objOrWhatever.hasOwnProperty(key)) {
-            _.pull(allKeys, key);
-
-            let newPropKey = key;
-            options.isGetter = false;
-            if (newPropKey.includes('.')) {
-              newPropKey = `['${newPropKey}']`;
-            }
-            // @ts-ignore
-            this._walk(
-              json,
-              objOrWhatever[newPropKey],
-              iterator,
-              `${lodashPath === '' ? '' : `${lodashPath}.`}${newPropKey}`,
-              options,
-              depthLevel + 1,
-            );
-          }
-        }
-        if (walkGetters) {
-          for (let index = 0; index < allKeys.length; index++) {
-            if (_.isObject(objOrWhatever)) {
-              const key = allKeys[index];
-
-              // @ts-ignore
-              options.isGetter = true;
-              // @ts-ignore
-              this._walk(
-                json,
-                objOrWhatever[key],
-                iterator,
-                `${lodashPath === '' ? '' : `${lodashPath}.`}${key}`,
-                options,
-                depthLevel + 1,
-              );
-            }
-          }
-        }
-      }
-
-      // @ts-ignore
-      if (options._exit && json === objOrWhatever) {
-        // @ts-ignore
-        options._exit = false;
-      }
-    }
-
-    return options;
+  private static isObjectLike(value: unknown): value is object {
+    return (
+      value !== null &&
+      (typeof value === 'object' || typeof value === 'function')
+    );
   }
 }
 
