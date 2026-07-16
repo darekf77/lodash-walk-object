@@ -1,4 +1,3 @@
-
 export interface Circ {
   /**
    * Path whose value points to an already visited object.
@@ -22,10 +21,25 @@ export namespace Models {
     p: string;
     parent?: Ver;
     isGetter?: boolean;
+    /**
+     * Active ancestor chain used by breadth-first traversal when
+     * shared objects should not be treated as circular.
+     */
+    ancestors?: InDBType[];
   }
 
   export interface StartIteratorOptions {
     walkGetters?: boolean;
+
+    /**
+     * When false, every repeated object reference is treated as circular.
+     *
+     * When true, only references to objects in the current ancestor chain
+     * are treated as circular. Shared objects are walked for every path.
+     *
+     * @default false
+     */
+    considerSharedObjects?: boolean;
 
     /**
      * Circular checking is especially useful for breadth-first traversal.

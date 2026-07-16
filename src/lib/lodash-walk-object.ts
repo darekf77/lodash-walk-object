@@ -1,8 +1,16 @@
 import { _ } from 'tnp-core/src';
 
-import { Circ, Models, Iterator, UnknownRecord, PropertyEntry, PreparedPath } from './models';
+import {
+  Circ,
+  Models,
+  Iterator,
+  UnknownRecord,
+  PropertyEntry,
+  PreparedPath,
+} from './models';
 
 export class Helpers {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   public static get Walk() {
     const self = this;
 
@@ -63,6 +71,7 @@ export class Helpers {
       walkGetters: options.walkGetters ?? true,
       checkCircural: options.checkCircural ?? false,
       breadthWalk: options.breadthWalk ?? false,
+      considerSharedObjects: options.considerSharedObjects ?? false,
 
       include: options.include ?? [],
       exclude: options.exclude ?? [],
@@ -132,58 +141,69 @@ export class Helpers {
       return;
     }
 
-    this.prepareCurrentValue(currentValue, lodashPath, options, isGetter);
-
-    if (options._exit) {
-      return;
-    }
-
-    if (options.hasIterator && lodashPath !== '') {
-      iterator(
-        currentValue,
-        lodashPath,
-        this._changeValue(json, lodashPath, false, options),
-        options,
-      );
-    }
-
-    if (options._exit) {
-      return;
-    }
-
-    if (options._valueChanged) {
-      currentValue = _.get(json, lodashPath);
-      options._valueChanged = false;
-    }
-
-    if (options.isCircural) {
-      options._skip = true;
-    }
-
-    if (options._skip) {
-      options._skip = false;
-      return;
-    }
-
-    const children = this.findChildren(
+    const pushedToStack = this.prepareCurrentValue(
       currentValue,
       lodashPath,
-      options.walkGetters ?? true,
+      options,
+      isGetter,
     );
 
-    for (const child of children) {
+    try {
       if (options._exit) {
         return;
       }
 
-      this.walkDepthFirst(
-        json,
-        child.value,
-        iterator,
-        child.path,
-        options,
-        child.isGetter,
+      if (options.hasIterator && lodashPath !== '') {
+        iterator(
+          currentValue,
+          lodashPath,
+          this._changeValue(json, lodashPath, false, options),
+          options,
+        );
+      }
+
+      if (options._exit) {
+        return;
+      }
+
+      if (options._valueChanged) {
+        currentValue = _.get(json, lodashPath);
+        options._valueChanged = false;
+      }
+
+      if (options.isCircural) {
+        return;
+      }
+
+      if (options._skip) {
+        options._skip = false;
+        return;
+      }
+
+      const children = this.findChildren(
+        currentValue,
+        lodashPath,
+        options.walkGetters ?? true,
       );
+
+      for (const child of children) {
+        if (options._exit) {
+          return;
+        }
+
+        this.walkDepthFirst(
+          json,
+          child.value,
+          iterator,
+          child.path,
+          options,
+          child.isGetter,
+        );
+      }
+    } finally {
+      if (pushedToStack && options.considerSharedObjects) {
+        options.stack?.pop();
+      }
     }
   }
 
@@ -198,6 +218,7 @@ export class Helpers {
         v: json,
         p: lodashPath,
         isGetter: false,
+        ancestors: [],
       },
     ];
 
@@ -216,15 +237,57 @@ export class Helpers {
         continue;
       }
 
-      this.prepareCurrentValue(
-        current.v,
-        current.p,
-        options,
-        current.isGetter ?? false,
-      );
+      options.isGetter = current.isGetter ?? false;
+      options.isCircural = false;
 
-      if (options._exit) {
-        break;
+      let childAncestors = current.ancestors ?? [];
+
+      if (options.checkCircural && this.isObjectLike(current.v)) {
+        if (options.considerSharedObjects) {
+          const existingAncestor = childAncestors.find(
+            entry => entry.target === current.v,
+          );
+
+          if (existingAncestor) {
+            options.circural ??= [];
+
+            options.circural.push({
+              pathToObj: current.p,
+              circuralTargetPath: existingAncestor.path,
+            });
+
+            options.isCircural = true;
+          } else {
+            childAncestors = [
+              ...childAncestors,
+              {
+                target: current.v,
+                path: current.p,
+              },
+            ];
+          }
+        } else {
+          options.stack ??= [];
+          options.circural ??= [];
+
+          const existing = options.stack.find(
+            entry => entry.target === current.v,
+          );
+
+          if (existing) {
+            options.circural.push({
+              pathToObj: current.p,
+              circuralTargetPath: existing.path,
+            });
+
+            options.isCircural = true;
+          } else {
+            options.stack.push({
+              target: current.v,
+              path: current.p,
+            });
+          }
+        }
       }
 
       if (options.hasIterator && current.p !== '') {
@@ -266,6 +329,7 @@ export class Helpers {
           p: child.path,
           parent: current,
           isGetter: child.isGetter,
+          ancestors: childAncestors,
         });
       }
     }
@@ -278,12 +342,12 @@ export class Helpers {
     lodashPath: string,
     options: Models.InternalValues,
     isGetter: boolean,
-  ): void {
+  ): boolean {
     options.isGetter = isGetter;
     options.isCircural = false;
 
     if (!options.checkCircural || !this.isObjectLike(value)) {
-      return;
+      return false;
     }
 
     const stack = options.stack ?? [];
@@ -301,13 +365,15 @@ export class Helpers {
       });
 
       options.isCircural = true;
-      return;
+      return false;
     }
 
     stack.push({
       target: value,
       path: lodashPath,
     });
+
+    return true;
   }
 
   private static findChildren(
@@ -585,6 +651,7 @@ export class Helpers {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   private static get _Helpers() {
     return {
       get Path() {
