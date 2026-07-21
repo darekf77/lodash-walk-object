@@ -13,7 +13,6 @@
   ],
 
   "html.format.wrapAttributes": "force-aligned",
-  "workbench.colorTheme": "Light+",
 
   "files.exclude": {
     "_changelog": true,
