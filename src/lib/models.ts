@@ -31,6 +31,8 @@ export namespace Models {
   export interface StartIteratorOptions {
     walkGetters?: boolean;
 
+    walkPropsWithFunction?: boolean;
+
     /**
      * When false, every repeated object reference is treated as circular.
      *

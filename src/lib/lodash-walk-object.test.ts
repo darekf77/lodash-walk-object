@@ -863,6 +863,31 @@ describe('walk.Object', () => {
       expect(paths).toEqual(['some-key', 'some-key.$value']);
     });
   });
+
+  it('should go thorugh function', () => {
+    const context = {
+      id: 123,
+      data: {
+        functionValue: () => 'before',
+      },
+    };
+
+    let found = false;
+    walk.Object(
+      context,
+      (_value, path, changeValueTo) => {
+        if (path === 'data.functionValue') {
+          found = true;
+        }
+      },
+      {
+        walkGetters: false,
+        walkPropsWithFunction: true,
+      },
+    );
+
+    expect(found).toEqual(true);
+  });
 });
 
 describe('walk.ObjectBy', () => {
@@ -954,6 +979,90 @@ describe('walk.ObjectBy', () => {
       },
     });
   });
+
+  it('should go through function properties', () => {
+    const fn = () => 'before';
+    fn.someProp = 'hello';
+
+    const context = {
+      id: 123,
+      data: {
+        functionValue: fn,
+      },
+    };
+
+    let found = false;
+
+    walk.ObjectBy(
+      'data',
+      context,
+      (_value, path) => {
+        if (path === 'functionValue.someProp') {
+          found = true;
+        }
+      },
+      {
+        walkGetters: false,
+        walkPropsWithFunction: true,
+      },
+    );
+
+    expect(found).toEqual(true);
+  });
+
+  it('should not go through function properties by default', () => {
+    const fn = () => 'before';
+    fn.someProp = 'hello';
+
+    const context = {
+      id: 123,
+      data: {
+        functionValue: fn,
+      },
+    };
+
+    let found = false;
+
+    walk.ObjectBy(
+      'data',
+      context,
+      (_value, path) => {
+        if (path === 'functionValue.someProp') {
+          found = true;
+        }
+      },
+      {
+        walkGetters: false,
+        walkPropsWithFunction: false,
+      },
+    );
+
+    expect(found).toEqual(false);
+  });
+
+  it('should go thorugh function', () => {
+    const context = {
+      id: 123,
+      data: {
+        functionValue: () => 'before',
+      },
+    };
+
+    let found = false;
+    walk.ObjectBy(
+      'data',
+      context,
+      (_value, path, changeValueTo) => {
+        if (path === 'functionValue') {
+          found = true;
+        }
+      },
+      {
+        walkGetters: false,
+        walkPropsWithFunction: true,
+      },
+    );
+
+    expect(found).toEqual(true);
+  });
 });
-
-

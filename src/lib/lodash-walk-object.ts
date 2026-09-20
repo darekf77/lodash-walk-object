@@ -70,6 +70,7 @@ export class Helpers {
 
       walkGetters: options.walkGetters ?? true,
       checkCircural: options.checkCircural ?? false,
+      walkPropsWithFunction: options.walkPropsWithFunction ?? false,
       breadthWalk: options.breadthWalk ?? false,
       considerSharedObjects: options.considerSharedObjects ?? false,
 
@@ -184,6 +185,7 @@ export class Helpers {
         currentValue,
         lodashPath,
         options.walkGetters ?? true,
+        options.walkPropsWithFunction ?? false,
       );
 
       for (const child of children) {
@@ -321,6 +323,7 @@ export class Helpers {
         current.v,
         current.p,
         options.walkGetters ?? true,
+        options.walkPropsWithFunction ?? false,
       );
 
       for (const child of children) {
@@ -380,6 +383,7 @@ export class Helpers {
     value: unknown,
     parentPath: string,
     walkGetters: boolean,
+    walkPropsWithFunction: boolean,
   ): Array<{
     value: unknown;
     path: string;
@@ -394,6 +398,12 @@ export class Helpers {
     }
 
     if (!this.isObjectLike(value)) {
+      return [];
+    }
+
+    // Function itself can be visited by iterator,
+    // but its properties are walked only when explicitly enabled.
+    if (_.isFunction(value) && !walkPropsWithFunction) {
       return [];
     }
 
