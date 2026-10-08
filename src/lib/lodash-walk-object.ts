@@ -401,6 +401,11 @@ export class Helpers {
       return [];
     }
 
+    // Date is treated as a leaf value.
+    if (_.isLeafObject(value)) {
+      return [];
+    }
+
     // Function itself can be visited by iterator,
     // but its properties are walked only when explicitly enabled.
     if (_.isFunction(value) && !walkPropsWithFunction) {
